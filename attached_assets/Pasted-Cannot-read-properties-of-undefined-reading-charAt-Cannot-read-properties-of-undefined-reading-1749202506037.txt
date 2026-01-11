@@ -1,0 +1,23 @@
+Cannot read properties of undefined (reading 'charAt')
+Cannot read properties of undefined (reading 'charAt')
+The above error occurred in the <AdminProductsPage> component:
+
+    at AdminProductsPage (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/pages/admin/products/index.tsx:32:27)
+    at main
+    at div
+    at AdminLayout (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/admin/AdminLayout.tsx:21:39)
+    at Route (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=bad4ee1b:280:16)
+    at ProtectedAdminRoute (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/lib/protected-admin-route.tsx:23:3)
+    at Switch (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=bad4ee1b:336:17)
+    at Suspense
+    at Router
+    at div
+    at CartProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/CartContext.tsx:22:32)
+    at AuthProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/AuthContext.tsx:26:32)
+    at LanguageProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/LanguageContext.tsx:254:36)
+    at QueryClientProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=bad4ee1b:2879:3)
+    at App (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/App.tsx?v=20WLNJHanHwkpAWA5Ktwf:311:51)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+Cannot read properties of undefined (reading 'charAt')

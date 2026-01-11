@@ -1,0 +1,28 @@
+[API Error] POST /api/admin/events: 
+Error {}
+
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Create event mutation error: 
+Error {}
+
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Create event exception: 
+Error {}
+
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Create event error: 
+Error {}
+
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400

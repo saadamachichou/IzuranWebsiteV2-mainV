@@ -1,0 +1,107 @@
+4:22:13 PM [express] POST /api/paypal/order/0JY35087MY8091352/capture 201 in 1786ms :: {"id":"0JY350…
+Processing PayPal payment response: {
+  "id": "0JY35087MY8091352",
+  "status": "COMPLETED",
+  "payment_source": {
+    "paypal": {
+      "email_address": "sb-olxwr41456961@personal.example.com",
+      "account_id": "GGJZ83W72A4NQ",
+      "account_status": "VERIFIED",
+      "name": {
+        "given_name": "John",
+        "surname": "Doe"
+      },
+      "address": {
+        "country_code": "FR"
+      }
+    }
+  },
+  "purchase_units": [
+    {
+      "reference_id": "default",
+      "shipping": {
+        "name": {
+          "full_name": "John Doe"
+        },
+        "address": {
+          "address_line_1": "Av. de la Pelouse, 87648672 Mayet",
+          "admin_area_2": "Paris",
+          "admin_area_1": "Alsace",
+          "postal_code": "75002",
+          "country_code": "FR"
+        }
+      },
+      "payments": {
+        "captures": [
+          {
+            "id": "58U40500VM1176436",
+            "status": "COMPLETED",
+            "amount": {
+              "currency_code": "USD",
+              "value": "45.00"
+            },
+            "final_capture": true,
+            "seller_protection": {
+              "status": "ELIGIBLE",
+              "dispute_categories": [
+                "ITEM_NOT_RECEIVED",
+                "UNAUTHORIZED_TRANSACTION"
+              ]
+            },
+            "seller_receivable_breakdown": {
+              "gross_amount": {
+                "currency_code": "USD",
+                "value": "45.00"
+              },
+              "paypal_fee": {
+                "currency_code": "USD",
+                "value": "2.51"
+              },
+              "net_amount": {
+                "currency_code": "USD",
+                "value": "42.49"
+              }
+            },
+            "links": [
+              {
+                "href": "https://api.sandbox.paypal.com/v2/payments/captures/58U40500VM1176436",
+                "rel": "self",
+                "method": "GET"
+              },
+              {
+                "href": "https://api.sandbox.paypal.com/v2/payments/captures/58U40500VM1176436/refund",
+                "rel": "refund",
+                "method": "POST"
+              },
+              {
+                "href": "https://api.sandbox.paypal.com/v2/checkout/orders/0JY35087MY8091352",
+                "rel": "up",
+                "method": "GET"
+              }
+            ],
+            "create_time": "2025-05-04T16:22:13Z",
+            "update_time": "2025-05-04T16:22:13Z"
+          }
+        ]
+      }
+    }
+  ],
+  "payer": {
+    "name": {
+      "given_name": "John",
+      "surname": "Doe"
+    },
+    "email_address": "sb-olxwr41456961@personal.example.com",
+    "payer_id": "GGJZ83W72A4NQ",
+    "address": {
+      "country_code": "FR"
+    }
+  },
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v2/checkout/orders/0JY35087MY8091352",
+      "rel": "self",
+      "method": "GET"
+    }
+  ]
+}

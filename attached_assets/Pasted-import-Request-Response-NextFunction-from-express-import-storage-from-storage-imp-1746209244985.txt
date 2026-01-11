@@ -1,0 +1,98 @@
+import { Request, Response, NextFunction } from 'express';
+import { storage } from '../storage';
+import jwt from 'jsonwebtoken';
+import { decrypt } from '../utils/encryption';
+import { logger } from '../utils/logger';
+
+const JWT_SECRET = process.env.JWT_SECRET  'default_secret_key_change_in_production';
+const TOKEN_EXPIRY = '1h';
+
+// Types for JWT payload
+interface JwtPayload {
+  userId: number;
+  email: string;
+  isAdmin?: boolean;
+  exp?: number;
+}
+
+// Add user property to Express Request
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: number;
+        email: string;
+        isAdmin?: boolean;
+      };
+    }
+  }
+}
+
+// Generate JWT token
+export const generateToken = (userId: number, email: string, isAdmin = false): string => {
+  logger.debug(Generating JWT token for user ID: ${userId}, email: ${email});
+  const token = jwt.sign(
+    { userId, email, isAdmin },
+    JWT_SECRET,
+    { expiresIn: TOKEN_EXPIRY }
+  );
+  logger.debug(Token generated successfully: ${token.substring(0, 10)}...);
+  return token;
+};
+
+// Verify JWT token from request
+export const verifyToken = (token: string): JwtPayload | null => {
+  try {
+    logger.debug(Verifying JWT token: ${token.substring(0, 10)}...);
+    const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    logger.debug(JWT verification successful for user ID: ${payload.userId}, email: ${payload.email});
+    return payload;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error(JWT verification failed: ${errorMessage});
+    return null;
+  }
+};
+
+// Authentication middleware
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    logger.debug(Authentication attempt with header: ${authHeader ? 'Present' : 'None'});
+
+    if (!authHeader  !authHeader.startsWith('Bearer ')) {
+      logger.debug(Auth failed: No valid Authorization header found: ${authHeader});
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    logger.debug(JWT token received, verifying...);
+    const payload = verifyToken(token);
+
+    if (!payload) {
+      logger.debug('Auth failed: Invalid or expired token');
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
+    // Add user to request
+    req.user = {
+      userId: payload.userId,
+      email: payload.email,
+      isAdmin: payload.isAdmin || false
+    };
+
+    logger.debug(Auth successful: User ${payload.email} (ID: ${payload.userId}) authenticated);
+    next();
+  } catch (error) {
+    logger.error(Authentication error: ${error instanceof Error ? error.message : 'Unknown error'});
+    res.status(500).json({ message: 'Authentication error' });
+  }
+};
+
+// Admin-only middleware
+export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+  next();
+};

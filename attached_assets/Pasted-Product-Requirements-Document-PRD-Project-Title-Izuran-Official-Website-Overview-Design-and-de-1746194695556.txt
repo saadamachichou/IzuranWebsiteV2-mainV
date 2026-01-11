@@ -1,0 +1,211 @@
+Product Requirements Document (PRD)
+
+Project Title: Izuran Official Website
+
+Overview
+
+Design and develop a dark, psychedelic, audiophile-grade web platform for Izuran, a record label and event promoter rooted in Amazigh culture and esoteric knowledge. The website should promote artists, events, merchandise, knowledge, and audio performances with an immersive visual and auditory experience.
+
+Tech Stack
+
+Frontend: Nextjs, TailwindCSS
+
+Backend: Node.js (Express), neon postgress, prisma
+
+Audio Integration: Wavesurfer.js or React-Wavesurfer
+
+1. Core Objectives
+
+Showcase Izuran's artists, events, DJ/live sets, and merchandise.
+
+Create a fully immersive UX inspired by darkness, psychedelia, and esoteric visuals.
+
+Maintain high performance and responsive design across all devices.
+
+2. Features & Requirements
+
+2.1 Navbar
+
+Responsive layout using TailwindCSS.
+
+Left: Logo or brand name.
+
+Right: Links — Home, Artists, Events, Knowledge, Shop, Podcast, Tickets, Contact.
+
+Mobile: Hamburger menu with smooth open/close animation.
+
+Styling:
+
+Dark background with slight transparency and blur (glassmorphism).
+
+Hover effects: glowing text, scale-up transitions.
+
+2.2 Home Page Visuals
+
+Use dark gradients, flowing organic shapes, and subtle parallax/motion effects.
+
+Color palette: #000000 (black), #220022 (deep purple), #003333 (emerald green), #00ffff (neon blue).
+
+Typography: stylized to reflect ancient mysticism with futuristic edge.
+
+Purpose: Instantly immerse the visitor into Izuran’s sonic and visual world.
+
+2.3 Shop Section
+
+Grid layout:
+
+Desktop: 2–3 columns
+
+Mobile: 1 column
+
+Product Card includes:
+
+Image
+
+Name
+
+Short description
+
+Price
+
+"Add to Cart" button (ready for future integration)
+
+Hover animation: subtle glow, slight scale up.
+
+Product categories: vinyls, digital music, apparel, posters, audio packs.
+
+2.4 Podcast Section
+
+Purpose: Stream DJ sets and live recordings by Izuran artists.
+
+Layout:
+
+List of podcast items (cards or stacked layout).
+
+Each podcast contains:
+
+Cover art
+
+Set/episode title
+
+Short description (genre, energy, event)
+
+Embedded player (HTML5 <audio> or custom React component)
+
+Features:
+
+Optional search or filters (artist, genre, event date).
+
+Styling:
+
+Dark background
+
+Glowing outlines for active tracks
+
+Hover effects: fade-in, slight zoom
+
+Enhancement:
+
+Integrate Wavesurfer.js or React-Wavesurfer or something similiar
+
+Waveform with interactive scrubbing
+
+Neon-colored waves (deep purple, cyan, emerald green)
+
+Pulse or shimmer effects synced to bass
+
+Esoteric symbols appear/disappear subtly behind the waveform
+
+2.5 Tickets Section
+
+Purpose: Enable users to purchase tickets online for Izuran events, parties, and festivals.
+
+Layout:
+
+List of upcoming events with:
+
+Event name
+
+Date and time
+
+Location
+
+Short description
+
+Cover image or flyer
+
+“Buy Ticket” button for each event
+
+Features:
+
+Event details page with:
+
+Full description
+
+Map or location embed
+
+Tiered ticket options (General Admission, VIP, etc.)
+
+Quantity selector and checkout button
+
+Integration:
+
+Use Stripe or other payment gateway (for future integration)
+
+Prepare backend endpoints for ticketing data and purchases
+
+Optional: Confirmation email logic for ticket purchase
+
+Styling:
+
+Consistent dark psychedelic theme
+
+Hover glow on buttons
+
+Animate cards on scroll/fade in
+
+3. Branding & UX Guidelines
+
+Overall mood: dark, spiritual, experimental, and immersive.
+
+Visual identity inspired by underground audiophile culture and ancient mysticism.
+
+Fonts, colors, and animations should feel handcrafted for sonic explorers.
+
+Consistency in styling across all sections.
+
+4. Stretch Goals (Optional)
+
+User account system for purchasing or saving favorite podcasts.
+
+Live countdown to next event.
+
+Blog/Knowledge section featuring mystical/esoteric articles.
+
+Language toggle (e.g., English / Amazigh / French).
+
+5. Deliverables
+
+Responsive web application with all defined sections
+
+Frontend: Nextjs, TailwindCSS
+
+Backend: Node.js (Express), neon postgress, prisma ,backend for product and podcast data
+
+Audio player integration with waveform support
+
+Hosting & deployment strategy (Netlify + backend on Render or similar)
+
+
+
+6. Notes
+
+Prioritize performance and accessibility.
+
+Ensure good SEO practices.
+
+Test across browsers and devices.
+
+Prepare codebase for future e-commerce and content management integration.
+
+End of PRD

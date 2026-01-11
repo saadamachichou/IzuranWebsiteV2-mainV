@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+
+# Sitemap location (update with your actual domain)
+Sitemap: https://izuran.com/sitemap.xml

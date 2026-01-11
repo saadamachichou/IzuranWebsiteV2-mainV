@@ -1,0 +1,47 @@
+Warning: Received &#x60;true&#x60; for a non-boolean attribute &#x60;jsx&#x60;.
+
+If you want to write it to the DOM, pass a string instead: jsx=&quot;true&quot; or jsx={value.toString()}.
+    at style
+    at ShoppingCart (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/shop/ShoppingCart.tsx:285:7)
+    at div
+    at div
+    at header
+    at Navbar (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/layout/Navbar.tsx:37:22)
+    at div
+    at Layout (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/layout/Layout.tsx:21:3)
+    at Route (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b7929e68:280:16)
+    at Switch (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b7929e68:336:17)
+    at Suspense
+    at Router
+    at div
+    at MotionComponent (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=b7929e68:945:40)
+    at CartProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/CartContext.tsx:22:32)
+    at AuthProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/AuthContext.tsx:26:32)
+    at LanguageProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/LanguageContext.tsx:254:36)
+    at QueryClientProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=b7929e68:2879:3)
+    at App (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/App.tsx?v=xp3-T92Giu2YWcLWuKVbz:317:51)
+
+If you want to write it to the DOM, pass a string instead: jsx=&amp;quot;true&amp;quot; or jsx={value.toString()}.
+at style
+at ShoppingCart (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/shop/ShoppingCart.tsx:285:7)
+at div
+at div
+at header
+at Navbar (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/layout/Navbar.tsx:37:22)
+at div
+at Layout (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/components/layout/Layout.tsx:21:3)
+at Route (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b7929e68:280:16)
+at Switch (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=b7929e68:336:17)
+at Suspense
+at Router
+at div
+at MotionComponent (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=b7929e68:945:40)
+at CartProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/CartContext.tsx:22:32)
+at AuthProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/AuthContext.tsx:26:32)
+at LanguageProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/context/LanguageContext.tsx:254:36)
+at QueryClientProvider (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=b7929e68:2879:3)
+at App (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/src/App.tsx?v=xp3-T92Giu2YWcLWuKVbz:317:51)
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://6ca3900c-0b4f-4185-a0ec-75a814d1c6e4-00-w5qnxnjf2gyb.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400

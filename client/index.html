@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Permissions-Policy" content="encrypted-media=*, autoplay=*" />
+    <title>Izuran - Amazigh Music & Culture</title>
+    
+    <!-- Favicon declarations - Multiple sizes for better visibility -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=1" />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1" />
+    <link rel="apple-touch-icon" href="/favicon.ico?v=1" />
+    
+    <!-- Additional favicon sizes for better visibility -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/izuran_logo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/izuran_logo.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/izuran_logo.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/izuran_logo.png" />
+    
+    <!-- High-DPI favicon for retina displays -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/izuran_logo.png" />
+    
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#FFA500" />
+    
+    <!-- Preload LCP image for optimal Largest Contentful Paint -->
+    <link rel="preload" href="/images/izuran_logo.svg" as="image" fetchpriority="high" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Enhanced patch to improve bfcache compatibility
+      // This must run before any third-party widgets load
+      (function() {
+        // Patch addEventListener to intercept deprecated 'unload' events
+        const originalAddEventListener = Window.prototype.addEventListener;
+        Window.prototype.addEventListener = function(type, listener, options) {
+          // Replace unload with pagehide, which is bfcache-compatible
+          if (type === 'unload' || type === 'beforeunload') {
+            // For beforeunload, we still need it for some cases, but mark it as non-blocking
+            if (type === 'beforeunload') {
+              // Allow beforeunload but make it bfcache-friendly
+              return originalAddEventListener.call(this, type, listener, options);
+            }
+            // Replace unload with pagehide
+            type = 'pagehide';
+            const wrappedListener = function(event) {
+              if (typeof listener === 'function') {
+                listener.call(this, event);
+              } else if (listener && typeof listener.handleEvent === 'function') {
+                listener.handleEvent(event);
+              }
+            };
+            return originalAddEventListener.call(this, type, wrappedListener, options);
+          }
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+
+        // Patch window.onunload to prevent bfcache issues
+        // Redirect onunload assignments to pagehide for bfcache compatibility
+        try {
+          Object.defineProperty(Window.prototype, 'onunload', {
+            get: function() {
+              return this._onpagehide || null;
+            },
+            set: function(listener) {
+              if (this._onpagehide) {
+                this.removeEventListener('pagehide', this._onpagehide);
+              }
+              if (listener) {
+                this._onpagehide = listener;
+                this.addEventListener('pagehide', listener);
+              } else {
+                this._onpagehide = null;
+              }
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          // Property might already be defined or non-configurable, continue silently
+        }
+
+        // Handle bfcache restoration
+        window.addEventListener('pageshow', function(event) {
+          // If the page was restored from bfcache, the persisted property will be true
+          if (event.persisted) {
+            // Force a reflow to ensure everything renders correctly
+            document.body.offsetHeight;
+            // Dispatch a custom event that React components can listen to
+            window.dispatchEvent(new CustomEvent('bfcacheRestore'));
+          }
+        });
+
+        // Clean up on pagehide to help bfcache
+        window.addEventListener('pagehide', function(event) {
+          // Mark that we're navigating away (for cleanup if needed)
+          window.dispatchEvent(new CustomEvent('bfcacheHide', { detail: { persisted: event.persisted } }));
+        });
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
