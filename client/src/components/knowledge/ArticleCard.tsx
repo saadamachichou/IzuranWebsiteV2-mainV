@@ -3,25 +3,13 @@ import { Article } from "@shared/schema";
 import { Link } from "wouter";
 import { ArrowRight, FileText, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface ArticleCardProps {
   article: Article;
 }
 
 export default function ArticleCard({ article }: ArticleCardProps) {
-  const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
-
-  const handleImageLoad = () => {
-    setImageLoading(false);
-  };
-
-  const handleImageError = () => {
-    setImageError(true);
-    setImageLoading(false);
-  };
-
   return (
     <motion.div 
       className="article-card glassmorphism rounded-lg overflow-hidden transition-all glow-card border border-amber-500/20 hover:border-amber-500/40"
@@ -30,24 +18,18 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
     >
-      <div className="relative w-full h-48 article-image-container">
-        {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center article-image-loading">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
-          </div>
-        )}
-        
-        {!imageError && article.imageUrl ? (
-          <img 
-            src={article.imageUrl} 
-            alt={article.title} 
-            className="w-full h-full object-cover article-image transition-opacity duration-300"
-            style={{ opacity: imageLoading ? 0 : 1 }}
-            onLoad={handleImageLoad}
-            onError={handleImageError}
+      <div className="relative w-full h-48 article-image-container overflow-hidden">
+        {article.imageUrl ? (
+          <OptimizedImage
+            src={article.imageUrl}
+            alt={article.title}
+            className="w-full h-full object-cover object-center article-image"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
+            fallback="/placeholder.svg"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center article-image-fallback">
+          <div className="w-full h-full flex items-center justify-center article-image-fallback bg-gradient-to-br from-gray-800 to-gray-700">
             <div className="text-center">
               <ImageIcon className="w-12 h-12 text-amber-400/60 mx-auto mb-2" />
               <p className="text-amber-200/60 text-sm font-medium">{article.title}</p>

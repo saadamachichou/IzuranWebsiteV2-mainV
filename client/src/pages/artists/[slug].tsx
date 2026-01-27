@@ -152,16 +152,20 @@ export default function ArtistDetailPage() {
                 <Card className="bg-black border-amber-500/30 overflow-hidden hover:border-amber-500/50 transition-all duration-500">
                   <CardContent className="p-0">
                     <div className="aspect-[4/5] relative">
-                      <motion.img
-                        src={artist.image_Url || '/placeholder-artist.jpg'}
-                        alt={artist.name}
-                        className="w-full h-full object-cover"
+                      <motion.div
                         whileHover={{ scale: 1.05, rotate: 2 }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
-                        onError={(e) => {
-                          e.currentTarget.src = '/placeholder-artist.jpg';
-                        }}
-                      />
+                        className="w-full h-full"
+                      >
+                        <OptimizedImage
+                          src={artist.image_Url || '/placeholder-artist.jpg'}
+                          alt={artist.name}
+                          className="w-full h-full object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          loading="lazy"
+                          fallback="/placeholder-artist.jpg"
+                        />
+                      </motion.div>
                       
                       {/* Subtle border overlay for visual enhancement */}
                       <div className="absolute inset-0 border-2 border-amber-500/20 rounded-lg pointer-events-none"></div>

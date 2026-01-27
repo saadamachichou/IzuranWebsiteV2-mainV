@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingCart, ExternalLink, Star, Package } from 'lucide-react';
 import { Product } from '@shared/schema';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 // Format price with proper currency symbol
 const formatPrice = (price: string | number, currency: string = 'USD') => {
@@ -61,12 +62,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
       <Card className="overflow-hidden bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm border border-amber-500/20 hover:border-amber-500/40 shadow-xl hover:shadow-2xl transition-all duration-300">
         {/* Image Section */}
         <div className="relative overflow-hidden">
-          <div className="aspect-square bg-gradient-to-br from-amber-500/20 to-purple-500/20">
+          <div className="aspect-[2/3] relative bg-gray-900 overflow-hidden">
             {product.imageUrl ? (
-              <img
+              <OptimizedImage
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-700">
@@ -74,9 +77,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
               </div>
             )}
           </div>
-          
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           {/* Badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Instagram, ArrowRight } from "lucide-react";
 import { SoundCloudIcon, BandcampIcon } from "@/components/icons/BrandIcons";
 import { truncateText, DESCRIPTION_LIMIT } from "@/lib/text-utils";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export default function FeaturedArtists() {
   const { data: artists, isLoading, error } = useQuery<Artist[]>({
@@ -82,15 +83,16 @@ export default function FeaturedArtists() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <img 
-                src={artist.image_Url || '/placeholder-artist.jpg'}
-                alt={artist.name} 
-                className="w-full h-64 object-cover rounded mb-4" 
-                onError={(e) => {
-                  console.error('Image failed to load:', artist.image_Url);
-                  e.currentTarget.src = '/placeholder-artist.jpg';
-                }}
-              />
+              <div className="w-full h-64 overflow-hidden rounded mb-4">
+                <OptimizedImage
+                  src={artist.image_Url || '/placeholder-artist.jpg'}
+                  alt={artist.name}
+                  className="w-full h-full object-cover object-center"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  loading="lazy"
+                  fallback="/placeholder-artist.jpg"
+                />
+              </div>
               <h3 className="text-xl font-bold font-space text-white mb-2">{artist.name}</h3>
               <p className="text-sm md:text-base text-yellow-50 mb-4 line-clamp-3 drop-shadow" style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}>{truncateText(artist.description || "", DESCRIPTION_LIMIT)}</p>
               <div className="flex justify-between items-center">

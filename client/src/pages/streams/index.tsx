@@ -22,6 +22,26 @@ export default function Streams() {
     fetchStreams();
   }, []);
 
+  // Handle bfcache restoration for iframes
+  useEffect(() => {
+    const handleBfcacheRestore = () => {
+      // Restore any iframes that were unloaded
+      const iframes = document.querySelectorAll('iframe[data-bfcache-src]');
+      iframes.forEach((iframe) => {
+        const originalSrc = iframe.getAttribute('data-bfcache-src');
+        if (originalSrc) {
+          iframe.src = originalSrc;
+          iframe.removeAttribute('data-bfcache-src');
+        }
+      });
+    };
+
+    window.addEventListener('bfcacheRestore', handleBfcacheRestore);
+    return () => {
+      window.removeEventListener('bfcacheRestore', handleBfcacheRestore);
+    };
+  }, []);
+
   const fetchStreams = async () => {
     try {
       const response = await fetch('/api/streams', {

@@ -245,14 +245,6 @@ export default function Contact() {
                         className="transform hover:scale-110 transition-transform duration-300 hover:shadow-lg hover:shadow-red-500/20"
                       />
                       <SocialIcon 
-                        url="https://www.tiktok.com/@izuran" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        network="tiktok"
-                        style={{ height: 40, width: 40 }}
-                        className="transform hover:scale-110 transition-transform duration-300 hover:shadow-lg hover:shadow-black/20"
-                      />
-                      <SocialIcon 
                         url="https://www.facebook.com/izuran" 
                         target="_blank"
                         rel="noopener noreferrer"

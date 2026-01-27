@@ -1,3 +1,6 @@
+// CRITICAL: Import React first to ensure it loads before any vendor chunks
+import "react";
+import "react-dom";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";

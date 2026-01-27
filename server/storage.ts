@@ -1,6 +1,6 @@
 import { db } from "@db";
 import * as schema from "@shared/schema";
-import { eq, desc, like, inArray } from "drizzle-orm";
+import { eq, desc, like, inArray, and } from "drizzle-orm";
 
 // Simple in-memory cache for frequently accessed data
 const cache = new Map();
@@ -220,6 +220,7 @@ export const storage = {
     if (cached) return cached;
 
     const products = await db.query.products.findMany({
+      where: eq(schema.products.archived, false),
       orderBy: desc(schema.products.createdAt)
     });
     
@@ -233,7 +234,10 @@ export const storage = {
     if (cached) return cached;
 
     const products = await db.query.products.findMany({
-      where: eq(schema.products.category, category),
+      where: and(
+        eq(schema.products.category, category),
+        eq(schema.products.archived, false)
+      ),
       orderBy: desc(schema.products.createdAt)
     });
     
@@ -247,7 +251,10 @@ export const storage = {
     if (cached) return cached;
 
     const product = await db.query.products.findFirst({
-      where: eq(schema.products.slug, slug)
+      where: and(
+        eq(schema.products.slug, slug),
+        eq(schema.products.archived, false)
+      )
     });
     
     if (product) setCached(cacheKey, product);

@@ -26,82 +26,18 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#FFA500" />
     
-    <!-- Preload LCP image for optimal Largest Contentful Paint -->
-    <link rel="preload" href="/images/izuran_logo.svg" as="image" fetchpriority="high" />
+    <!-- Preload critical font for faster LCP -->
+    <link rel="preload" href="/fonts/DOS_Amazigh-1.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
+    
+    <!-- Resource hints for faster API connections -->
+    <link rel="preconnect" href="http://localhost:3000" />
+    <link rel="dns-prefetch" href="http://localhost:3000" />
+    
+    <!-- Load bfcache patch asynchronously to not block initial render -->
+    <script src="/bfcache-patch.js" defer></script>
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Enhanced patch to improve bfcache compatibility
-      // This must run before any third-party widgets load
-      (function() {
-        // Patch addEventListener to intercept deprecated 'unload' events
-        const originalAddEventListener = Window.prototype.addEventListener;
-        Window.prototype.addEventListener = function(type, listener, options) {
-          // Replace unload with pagehide, which is bfcache-compatible
-          if (type === 'unload' || type === 'beforeunload') {
-            // For beforeunload, we still need it for some cases, but mark it as non-blocking
-            if (type === 'beforeunload') {
-              // Allow beforeunload but make it bfcache-friendly
-              return originalAddEventListener.call(this, type, listener, options);
-            }
-            // Replace unload with pagehide
-            type = 'pagehide';
-            const wrappedListener = function(event) {
-              if (typeof listener === 'function') {
-                listener.call(this, event);
-              } else if (listener && typeof listener.handleEvent === 'function') {
-                listener.handleEvent(event);
-              }
-            };
-            return originalAddEventListener.call(this, type, wrappedListener, options);
-          }
-          return originalAddEventListener.call(this, type, listener, options);
-        };
-
-        // Patch window.onunload to prevent bfcache issues
-        // Redirect onunload assignments to pagehide for bfcache compatibility
-        try {
-          Object.defineProperty(Window.prototype, 'onunload', {
-            get: function() {
-              return this._onpagehide || null;
-            },
-            set: function(listener) {
-              if (this._onpagehide) {
-                this.removeEventListener('pagehide', this._onpagehide);
-              }
-              if (listener) {
-                this._onpagehide = listener;
-                this.addEventListener('pagehide', listener);
-              } else {
-                this._onpagehide = null;
-              }
-            },
-            configurable: true,
-            enumerable: true
-          });
-        } catch (e) {
-          // Property might already be defined or non-configurable, continue silently
-        }
-
-        // Handle bfcache restoration
-        window.addEventListener('pageshow', function(event) {
-          // If the page was restored from bfcache, the persisted property will be true
-          if (event.persisted) {
-            // Force a reflow to ensure everything renders correctly
-            document.body.offsetHeight;
-            // Dispatch a custom event that React components can listen to
-            window.dispatchEvent(new CustomEvent('bfcacheRestore'));
-          }
-        });
-
-        // Clean up on pagehide to help bfcache
-        window.addEventListener('pagehide', function(event) {
-          // Mark that we're navigating away (for cleanup if needed)
-          window.dispatchEvent(new CustomEvent('bfcacheHide', { detail: { persisted: event.persisted } }));
-        });
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

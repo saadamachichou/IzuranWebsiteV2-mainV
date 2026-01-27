@@ -45,18 +45,36 @@ const SoundCloudPlayer: React.FC<SoundCloudPlayerProps> = ({ url, height = 300 }
   useEffect(() => {
     const handleBfcacheRestore = () => {
       // When restored from bfcache, ensure iframe is properly loaded if it should be
-      if (iframeRef.current && shouldLoad && !iframeRef.current.src) {
+      if (iframeRef.current && shouldLoad) {
+        const currentSrc = iframeRef.current.src;
         const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=false&show_artwork=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=true`;
-        iframeRef.current.src = embedUrl;
+        // Only reload if src is empty or about:blank
+        if (!currentSrc || currentSrc === 'about:blank' || currentSrc.includes('about:blank')) {
+          iframeRef.current.src = embedUrl;
+        }
+      }
+    };
+
+    const handleBfcacheHide = (event: CustomEvent) => {
+      // Unload iframe on pagehide to prevent unload handlers from blocking bfcache
+      // Only if NOT being persisted (actual navigation)
+      if (iframeRef.current && !event.detail?.persisted) {
+        const currentSrc = iframeRef.current.src;
+        if (currentSrc && !currentSrc.startsWith('about:blank')) {
+          // Store src for potential restoration
+          iframeRef.current.setAttribute('data-bfcache-src', currentSrc);
+          // Unload iframe
+          iframeRef.current.src = 'about:blank';
+        }
       }
     };
 
     window.addEventListener('bfcacheRestore', handleBfcacheRestore);
+    window.addEventListener('bfcacheHide', handleBfcacheHide as EventListener);
 
     return () => {
       window.removeEventListener('bfcacheRestore', handleBfcacheRestore);
-      // Only clean up iframe on actual unmount (not bfcache)
-      // Don't clear src on bfcache as it will be preserved by the browser
+      window.removeEventListener('bfcacheHide', handleBfcacheHide as EventListener);
     };
   }, [url, shouldLoad]);
 

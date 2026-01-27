@@ -8,6 +8,7 @@ import { SoundCloudIcon, BandcampIcon } from "@/components/icons/BrandIcons";
 import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { truncateText, DESCRIPTION_LIMIT } from "@/lib/text-utils";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export default function Artists() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,14 +111,13 @@ export default function Artists() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
                     >
-                      <img 
-                        src={artist.image_Url || '/placeholder-artist.jpg'} 
-                        alt={artist.name} 
+                      <OptimizedImage
+                        src={artist.image_Url || '/placeholder-artist.jpg'}
+                        alt={artist.name}
                         className="w-full h-80 object-cover rounded mb-4"
-                        onError={(e) => {
-                          console.error('Image failed to load:', artist.image_Url);
-                          e.currentTarget.src = '/placeholder-artist.jpg';
-                        }}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        loading="lazy"
+                        fallback="/placeholder-artist.jpg"
                       />
                       <h3 className="text-xl font-bold font-space text-white mb-2">{artist.name}</h3>
                       <div className="text-amber-200/80 mb-4">

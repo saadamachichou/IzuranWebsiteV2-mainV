@@ -145,12 +145,16 @@ app.use((req, res, next) => {
     }
   });
 
-  // Set Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers, except for Firebase Auth, API auth routes, and the root route
+  // Set Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers, except for Firebase Auth, API auth routes, static assets, and the root route
   if (
     req.path.startsWith('/__/auth/') ||
     req.path.startsWith('/api/auth/') ||
     req.path.startsWith('/api/admin/') ||
     req.path.startsWith('/api/') ||
+    req.path.startsWith('/assets/') ||
+    req.path.startsWith('/uploads/') ||
+    req.path.startsWith('/images/') ||
+    req.path.startsWith('/fonts/') ||
     req.path === '/'
   ) {
     return next();
@@ -224,41 +228,68 @@ app.use(express.static(path.join(process.cwd(), 'client/public')));
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  const isDevelopment = process.env.NODE_ENV !== "production";
+  
+  if (isDevelopment) {
     await setupVite(app, server);
   } else {
+    // In production, serve static files from dist/public
+    // This MUST be called after registerRoutes to ensure API routes are registered first
     serveStatic(app);
   }
 
   // Catch-all to serve client-side app for any unhandled routes
-  app.use('*', (req, res, next) => {
-    // Skip static files and API routes
-    if (req.path.startsWith('/api/') || 
-        req.path.startsWith('/uploads/') ||
-        req.path.startsWith('/images/') ||
-        req.path.startsWith('/fonts/') ||
-        req.path === '/favicon.ico' ||
-        req.path === '/manifest.json' ||
-        req.path.match(/\.(ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|json|css|js)$/)) {
-      return next();
-    }
-    // Don't serve HTML for static assets
-    if (req.path.includes('.') && !req.path.includes('html')) {
-      return res.status(404).send('Not found');
-    }
-    const indexPath = path.join(process.cwd(), 'client', 'index.html');
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(path.resolve(indexPath));
-    } else {
-      res.status(404).send('index.html not found');
-    }
-  });
+  // Only needed in development - in production, serveStatic handles this
+  if (isDevelopment) {
+    app.use('*', (req, res, next) => {
+      // Skip static files and API routes
+      if (req.path.startsWith('/api/') || 
+          req.path.startsWith('/uploads/') ||
+          req.path.startsWith('/images/') ||
+          req.path.startsWith('/fonts/') ||
+          req.path === '/favicon.ico' ||
+          req.path === '/manifest.json' ||
+          req.path.match(/\.(ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|json|css|js)$/)) {
+        return next();
+      }
+      // Don't serve HTML for static assets
+      if (req.path.includes('.') && !req.path.includes('html')) {
+        return res.status(404).send('Not found');
+      }
+      const indexPath = path.join(process.cwd(), 'client', 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(path.resolve(indexPath));
+      } else {
+        res.status(404).send('index.html not found');
+      }
+    });
+  }
 
   // ALWAYS serve the app on port 3000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 3000;
+  const port = process.env.PORT || 3000;
+  const isProduction = process.env.NODE_ENV === "production";
   server.listen(port, () => {
-    log(`serving on port ${port}`);
+    log(`✓ Server is running on http://localhost:${port}`);
+    log(`✓ Environment: ${isProduction ? "production" : "development"}`);
+    if (isProduction) {
+      log(`✓ Serving static files from: ${path.resolve(process.cwd(), "dist", "public")}`);
+    }
   });
-})();
+  
+  server.on('error', (error: any) => {
+    if (error.code === 'EADDRINUSE') {
+      log(`✗ Port ${port} is already in use. Please stop the other process or use a different port.`);
+    } else {
+      log(`✗ Server error: ${error.message}`);
+    }
+    process.exit(1);
+  });
+})().catch((error) => {
+  console.error('✗ Failed to start server:', error);
+  if (error instanceof Error) {
+    console.error('Error stack:', error.stack);
+  }
+  process.exit(1);
+});

@@ -1,14 +1,22 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Helmet } from "react-helmet";
 
 import HeroSection from "@/components/ui/hero-section";
 import FeaturedArtists from "@/components/home/FeaturedArtists";
-import PodcastList from "@/components/podcast/PodcastList";
-import EventList from "@/components/events/EventList";
-import ProductList from "@/components/shop/ProductList";
-import ArticleList from "@/components/knowledge/ArticleList";
-import Newsletter from "@/components/home/Newsletter";
-import FloatingSymbols from "@/components/ui/floating-symbols";
+
+// Lazy load below-the-fold components to improve initial load time
+const PodcastList = lazy(() => import("@/components/podcast/PodcastList").then(m => ({ default: m.default })));
+const EventList = lazy(() => import("@/components/events/EventList").then(m => ({ default: m.default })));
+const ProductList = lazy(() => import("@/components/shop/ProductList").then(m => ({ default: m.default })));
+const ArticleList = lazy(() => import("@/components/knowledge/ArticleList").then(m => ({ default: m.default })));
+const Newsletter = lazy(() => import("@/components/home/Newsletter").then(m => ({ default: m.default })));
+
+// Simple loading placeholder for lazy components
+const SectionLoader = () => (
+  <div className="flex items-center justify-center py-16">
+    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-amber-500"></div>
+  </div>
+);
 
 export default function Home() {
   // Ensure we always start at the top of the page when visiting the homepage
@@ -18,42 +26,18 @@ export default function Home() {
       window.history.replaceState(null, '', window.location.pathname);
     }
     
-    // Force scroll to top immediately and aggressively
-    const scrollToTop = () => {
-      window.scrollTo(0, 0);
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
+    // Scroll to top immediately - simplified approach
+    window.scrollTo({ top: 0, behavior: 'instant' });
     
-    // Scroll to top immediately
-    scrollToTop();
-    
-    // Also scroll to top after a short delay to handle any async content loading
-    const timeout1 = setTimeout(scrollToTop, 100);
-    const timeout2 = setTimeout(scrollToTop, 500);
-    const timeout3 = setTimeout(scrollToTop, 1000);
-    
-    // Ensure scroll position stays at top for the first few seconds
-    const ensureTopPosition = () => {
-      if (window.scrollY > 0 || document.documentElement.scrollTop > 0 || document.body.scrollTop > 0) {
-        scrollToTop();
+    // Single delayed check for async content (reduced from multiple timers)
+    const timeout = setTimeout(() => {
+      if (window.scrollY > 0) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }
-    };
-    
-    // Check scroll position multiple times to ensure it stays at top
-    const interval = setInterval(ensureTopPosition, 100);
-    
-    // Stop checking after 3 seconds
-    const timeout4 = setTimeout(() => {
-      clearInterval(interval);
-    }, 3000);
+    }, 100);
     
     return () => {
-      clearTimeout(timeout1);
-      clearTimeout(timeout2);
-      clearTimeout(timeout3);
-      clearTimeout(timeout4);
-      clearInterval(interval);
+      clearTimeout(timeout);
     };
   }, []);
 
@@ -81,7 +65,9 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Latest Podcasts</span>
               </h2>
               
-              <PodcastList limit={2} />
+              <Suspense fallback={<SectionLoader />}>
+                <PodcastList limit={2} />
+              </Suspense>
             </div>
           </section>
           
@@ -95,7 +81,9 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Upcoming Events</span>
               </h2>
               
-              <EventList limit={2} />
+              <Suspense fallback={<SectionLoader />}>
+                <EventList limit={2} />
+              </Suspense>
             </div>
           </section>
 
@@ -109,7 +97,9 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Past Events</span>
               </h2>
               
-              <EventList limit={2} queryKey="/api/events/past" />
+              <Suspense fallback={<SectionLoader />}>
+                <EventList limit={2} queryKey="/api/events/past" />
+              </Suspense>
             </div>
           </section>
           
@@ -121,7 +111,9 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Shop</span>
               </h2>
               
-              <ProductList limit={3} />
+              <Suspense fallback={<SectionLoader />}>
+                <ProductList limit={3} />
+              </Suspense>
             </div>
           </section>
           
@@ -133,11 +125,15 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Esoteric Knowledge</span>
               </h2>
               
-              <ArticleList limit={3} />
+              <Suspense fallback={<SectionLoader />}>
+                <ArticleList limit={3} />
+              </Suspense>
             </div>
           </section>
           
-          <Newsletter />
+          <Suspense fallback={<SectionLoader />}>
+            <Newsletter />
+          </Suspense>
         </main>
       </div>
     </>

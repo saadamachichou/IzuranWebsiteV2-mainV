@@ -3191,7 +3191,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(`${apiPrefix}/admin/products`, isAdmin, async (req, res) => {
     try {
       const products = await db.query.products.findMany({
-        where: eq(schema.products.archived, false),
         orderBy: desc(schema.products.createdAt)
       });
       return res.json(products);
@@ -3240,6 +3239,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const [product] = await db.insert(schema.products)
         .values(productData)
         .returning();
+      
+      // Clear product cache to ensure fresh data
+      storage.clearCacheEntry('all_products');
+      // Clear category caches
+      const categories = ['vinyl', 'digital', 'merch', 'clothing', 'accessories', 'other'];
+      categories.forEach(cat => storage.clearCacheEntry(`products_${cat}`));
+      
       return res.status(201).json(product);
     } catch (err) {
       handleErrors(err, res);
@@ -3277,6 +3283,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .set(productData)
         .where(eq(schema.products.id, id))
         .returning();
+      
+      // Clear product cache to ensure fresh data
+      storage.clearCacheEntry('all_products');
+      if (updatedProduct.slug) {
+        storage.clearCacheEntry(`product_${updatedProduct.slug}`);
+      }
+      // Clear category caches
+      const categories = ['vinyl', 'digital', 'merch', 'clothing', 'accessories', 'other'];
+      categories.forEach(cat => storage.clearCacheEntry(`products_${cat}`));
+      
       return res.json(updatedProduct);
     } catch (err) {
       handleErrors(err, res);
@@ -3299,6 +3315,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!archivedProduct) {
         return res.status(404).json({ message: "Product not found" });
       }
+
+      // Clear product cache to ensure fresh data
+      storage.clearCacheEntry('all_products');
+      if (archivedProduct.slug) {
+        storage.clearCacheEntry(`product_${archivedProduct.slug}`);
+      }
+      // Clear category caches
+      const categories = ['vinyl', 'digital', 'merch', 'clothing', 'accessories', 'other'];
+      categories.forEach(cat => storage.clearCacheEntry(`products_${cat}`));
 
       return res.json({ message: "Product archived successfully" });
     } catch (err) {

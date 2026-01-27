@@ -45,16 +45,16 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
       }
     });
     
-    // Fade in the logo with longer delay for contemplation
+    // Fade in the logo quickly for better perceived performance
     const fadeInTimeout = setTimeout(() => {
       setOpacity(1);
-    }, 800);
+    }, 200);
 
-    // Simulate loading progress with optimized pace for 3 seconds total
+    // Simulate loading progress with optimized pace for 1.5 seconds total
     const progressInterval = setInterval(() => {
       setProgress((prevProgress) => {
-        // Progress increment to reach 100% in exactly 2.5 seconds
-        const increment = 4; // 4% every 100ms = 100% in 2.5 seconds (25 intervals * 100ms = 2500ms = 2.5s)
+        // Progress increment to reach 100% in exactly 1 second
+        const increment = 10; // 10% every 100ms = 100% in 1 second (10 intervals * 100ms = 1000ms = 1s)
         const newProgress = Math.min(prevProgress + increment, 100);
 
         // When we reach 100%, clear the interval and set loading to false after brief delay
@@ -84,12 +84,12 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
             if (onLoadingComplete) {
               onLoadingComplete();
             }
-          }, 500); // Brief delay after reaching 100% (Total: 3 seconds)
+          }, 500); // Brief delay after reaching 100% (Total: 1.5 seconds)
         }
 
         return newProgress;
       });
-    }, 100); // 100ms interval: 4% every 100ms = 100% in exactly 2.5 seconds
+    }, 100); // 100ms interval: 10% every 100ms = 100% in exactly 1 second
 
     return () => {
       clearTimeout(fadeInTimeout);
@@ -147,6 +147,8 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
                   src="/images/izuran_logo.svg"
                   alt="Izuran Logo"
                   className="object-contain w-full h-full"
+                  fetchPriority="high"
+                  loading="eager"
                 />
               </motion.div>
 
