@@ -28,16 +28,29 @@ export function serveStatic(app: Express) {
 
   // Serve static files from dist/public - MUST be registered before catch-all
   // This will serve all assets (JS, CSS, images, etc.)
-  // Use absolute path and ensure it's registered correctly
   app.use(express.static(distPath, {
     // Don't serve index.html automatically for directory requests
     index: false,
-    // Set proper cache headers
+    // Cache hashed assets for 1 year, but allow revalidation
     maxAge: '1y',
+    immutable: true,
     etag: true,
     lastModified: true,
     // Ensure dotfiles are served (like .map files)
-    dotfiles: 'ignore'
+    dotfiles: 'ignore',
+    // Set proper Content-Type for JavaScript modules
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      } else if (filePath.endsWith('.html')) {
+        // HTML should not be cached
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    }
   }));
   
   // Log that static middleware is registered
@@ -67,7 +80,11 @@ export function serveStatic(app: Express) {
     // Serve index.html for all other routes (SPA fallback)
     const indexPath = path.resolve(distPath, "index.html");
     if (fs.existsSync(indexPath)) {
-      res.setHeader('Content-Type', 'text/html');
+      // Ensure HTML is never cached to allow updates
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.sendFile(indexPath);
     } else {
       res.status(404).send('index.html not found');
