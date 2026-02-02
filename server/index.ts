@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+// Import from static.ts (no vite dependencies) for production
+import { serveStatic, log } from "./static";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -231,6 +232,10 @@ app.use(express.static(path.join(process.cwd(), 'client/public')));
   const isDevelopment = process.env.NODE_ENV !== "production";
   
   if (isDevelopment) {
+    // Dynamic import with computed path to prevent esbuild from bundling vite.ts
+    // This ensures vite and its dependencies are never included in the production bundle
+    const vitePath = [".", "vite"].join("/");
+    const { setupVite } = await import(/* @vite-ignore */ vitePath);
     await setupVite(app, server);
   } else {
     // In production, serve static files from dist/public
