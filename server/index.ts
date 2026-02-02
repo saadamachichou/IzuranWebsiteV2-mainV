@@ -208,7 +208,7 @@ app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
 app.use('/fonts', express.static(path.join(process.cwd(), 'client/public/fonts')));
 // Also check public/fonts if it exists
 app.use('/fonts', express.static(path.join(process.cwd(), 'public/fonts')));
-// Serve client/public assets (like logos) - must come after specific routes
+// Serve client/public assets (logos, bfcache-patch.js, etc.) - same in dev and prod
 app.use(express.static(path.join(process.cwd(), 'client/public')));
 
 (async () => {
