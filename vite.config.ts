@@ -6,7 +6,9 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
+    ...(process.env.NODE_ENV !== "production"
+      ? [runtimeErrorOverlay()]
+      : []),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -29,44 +31,13 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     rollupOptions: {
-      // Enable tree-shaking but be careful with side effects
       treeshake: {
-        moduleSideEffects: 'no-external', // Only remove side effects from external modules
+        moduleSideEffects: 'no-external',
         propertyReadSideEffects: false,
         tryCatchDeoptimization: false,
       },
       output: {
-        manualChunks: (id) => {
-          // Separate node_modules into chunks
-          if (id.includes('node_modules')) {
-            // CRITICAL: ALL React-related packages MUST be in the same chunk
-            // This includes React core AND any package that uses React
-            if (id.includes('react') || 
-                id.includes('@radix-ui') ||
-                id.includes('framer-motion') ||
-                id.includes('@tanstack/react-query') ||
-                id.includes('lucide-react') ||
-                id.includes('wouter') ||
-                id.includes('recharts') ||
-                id.includes('embla-carousel') ||
-                id.includes('cmdk') ||
-                id.includes('vaul') ||
-                id.includes('input-otp')) {
-              return 'react-vendor';
-            }
-            // Firebase - separate chunk (no React dependency)
-            if (id.includes('firebase')) {
-              return 'firebase-vendor';
-            }
-            // Form libraries
-            if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
-              return 'form-vendor';
-            }
-            // Default vendor chunk for other node_modules
-            return 'vendor';
-          }
-        },
-        // Optimize chunk size
+        // No manualChunks: keep everything in default bundle order so React is never undefined.
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
@@ -76,8 +47,8 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     sourcemap: false,
-    // Optimize chunk sizes - increase warning limit but still optimize
-    chunkSizeWarningLimit: 600,
+    // Suppress chunk size warning (does not affect loading; just a suggestion)
+    chunkSizeWarningLimit: 1000,
     // Enable CSS code splitting
     cssCodeSplit: true,
     // Report compressed sizes

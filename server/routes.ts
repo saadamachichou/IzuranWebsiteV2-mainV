@@ -62,6 +62,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(503).json({ status: "error", message: "Service unavailable" });
     }
   });
+
+  // Debug: show static paths in production (visit http://localhost:3000/api/static-check)
+  app.get(`${apiPrefix}/static-check`, (req, res) => {
+    const distByDir = path.resolve(__dirname, "public");
+    const distByCwd = path.resolve(process.cwd(), "dist", "public");
+    const indexByDir = path.resolve(distByDir, "index.html");
+    const indexByCwd = path.resolve(distByCwd, "index.html");
+    res.json({
+      NODE_ENV: process.env.NODE_ENV,
+      cwd: process.cwd(),
+      distByDir,
+      distByDirExists: fs.existsSync(distByDir),
+      distByCwd,
+      distByCwdExists: fs.existsSync(distByCwd),
+      indexByDirExists: fs.existsSync(indexByDir),
+      indexByCwdExists: fs.existsSync(indexByCwd),
+    });
+  });
   
   // Error handler middleware
   const handleErrors = (err: any, res: any): Response => { // Explicitly set return type to Response

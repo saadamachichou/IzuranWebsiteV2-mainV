@@ -14,20 +14,19 @@ export function log(message: string, source = "express") {
 }
 
 /**
- * Production static serving - mirrors setupVite() order and behavior exactly:
- * 1. Static files from dist/public (like Vite serving built output)
- * 2. app.use("*") catch-all that serves index.html for SPA routes (same as dev)
+ * Production static serving - mirrors setupVite() order and behavior.
+ * Uses __dirname when bundled (dist/index.js) so path works from any cwd.
  */
 export function serveStatic(app: Express) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  const distPath = fs.existsSync(path.join(__dirname, "public"))
-    ? path.join(__dirname, "public")
-    : path.resolve(process.cwd(), "dist", "public");
+  const distByDir = path.resolve(__dirname, "public");
+  const distByCwd = path.resolve(process.cwd(), "dist", "public");
+  const distPath = fs.existsSync(distByDir) ? distByDir : distByCwd;
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find dist/public. Tried: ${distByDir} and ${distByCwd}. Run "npm run build" then "npm start".`,
     );
   }
 
@@ -37,8 +36,9 @@ export function serveStatic(app: Express) {
   }
 
   log(`Serving static files from: ${distPath}`);
+  log(`index.html at: ${indexPath}`);
 
-  // 1. Same as dev: serve static files (Vite does this via middleware; we use express.static)
+  // 1. Serve static files from dist/public
   app.use(express.static(distPath, {
     index: false,
     maxAge: "1y",
@@ -47,7 +47,7 @@ export function serveStatic(app: Express) {
     dotfiles: "ignore",
   }));
 
-  // 2. Same as dev: app.use("*", ...) catch-all - skip conditions match setupVite exactly
+  // 2. Catch-all: serve index.html for SPA routes (same skip logic as dev setupVite)
   app.use("*", (req, res, next) => {
     const url = req.originalUrl;
 
@@ -63,8 +63,12 @@ export function serveStatic(app: Express) {
       return next();
     }
 
-    // Serve built index.html (dev uses vite.transformIndexHtml on client/index.html)
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.sendFile(indexPath);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        log(`Error sending index.html: ${err.message}`, "static");
+        if (!res.headersSent) res.status(500).send("Error loading page");
+      }
+    });
   });
 }

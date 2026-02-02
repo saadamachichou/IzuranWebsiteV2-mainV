@@ -137,12 +137,16 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-
       log(logLine);
+    }
+    // In production, log page and asset requests so we can see if HTML/JS are served
+    if (process.env.NODE_ENV === "production" && req.method === "GET") {
+      if (path === "/" || path.startsWith("/assets/") || path === "/bfcache-patch.js") {
+        log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
+      }
     }
   });
 
@@ -208,10 +212,25 @@ app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
 app.use('/fonts', express.static(path.join(process.cwd(), 'client/public/fonts')));
 // Also check public/fonts if it exists
 app.use('/fonts', express.static(path.join(process.cwd(), 'public/fonts')));
-// Serve client/public assets (logos, bfcache-patch.js, etc.) - same in dev and prod
-app.use(express.static(path.join(process.cwd(), 'client/public')));
+// PRODUCTION: Serve built assets (/assets/*, index.html, bfcache-patch.js) FIRST so they load like in dev
+// Use __dirname when bundled (dist/index.js → __dirname is dist/) so it works from any cwd
+if (process.env.NODE_ENV === "production") {
+  const distPublicByDir = path.resolve(__dirname, "public");
+  const distPublicByCwd = path.resolve(process.cwd(), "dist", "public");
+  const distPublic = fs.existsSync(distPublicByDir) ? distPublicByDir : distPublicByCwd;
+  if (fs.existsSync(distPublic)) {
+    log(`[production] Serving built assets from: ${distPublic}`);
+    app.use(express.static(distPublic, { index: false }));
+  } else {
+    log(`[production] WARNING: dist/public not found at ${distPublicByDir} or ${distPublicByCwd}`);
+  }
+}
+// Serve client/public (logos, bfcache-patch.js in dev; prod uses dist/public above first)
+app.use(express.static(path.join(process.cwd(), "client/public")));
 
 (async () => {
+  // Register all API routes (auth, artists, events, products, payments, etc.)
+  // Same server serves both: API at /api/* and built frontend from dist/public
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -279,7 +298,8 @@ app.use(express.static(path.join(process.cwd(), 'client/public')));
     log(`✓ Server is running on http://localhost:${port}`);
     log(`✓ Environment: ${isProduction ? "production" : "development"}`);
     if (isProduction) {
-      log(`✓ Serving static files from: ${path.resolve(process.cwd(), "dist", "public")}`);
+      log(`✓ API routes at /api/* (e.g. /api/health, /api/artists)`);
+      log(`✓ Static frontend from: ${path.resolve(process.cwd(), "dist", "public")}`);
     }
   });
   

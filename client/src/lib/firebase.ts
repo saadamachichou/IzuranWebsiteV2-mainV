@@ -1,49 +1,62 @@
-import { initializeApp } from "firebase/app";
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult, 
-  onAuthStateChanged,
-  User as FirebaseUser,
-  signOut as firebaseSignOut
+import { initializeApp, type FirebaseApp } from "firebase/app";
+import {
+  getAuth,
+  type Auth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut as firebaseSignOut,
 } from "firebase/auth";
-import { 
-  getStorage, 
-  ref, 
-  uploadBytes, 
-  getDownloadURL 
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  type FirebaseStorage,
 } from "firebase/storage";
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
+const FIREBASE_NOT_CONFIGURED = "Firebase is not configured (missing VITE_FIREBASE_* env).";
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const storage = getStorage(app);
-const googleProvider = new GoogleAuthProvider();
+function getFirebaseConfig() {
+  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+  const appId = import.meta.env.VITE_FIREBASE_APP_ID;
+  if (!apiKey || !projectId || !appId) return null;
+  return {
+    apiKey,
+    authDomain: `${projectId}.firebaseapp.com`,
+    projectId,
+    storageBucket: `${projectId}.appspot.com`,
+    appId,
+  };
+}
 
-// Configure Google provider
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let storage: FirebaseStorage | null = null;
+let googleProvider: GoogleAuthProvider | null = null;
 
-// Add People API scope for profile photo access
-googleProvider.addScope('profile');
-googleProvider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+try {
+  const config = getFirebaseConfig();
+  if (config) {
+    app = initializeApp(config);
+    auth = getAuth(app);
+    storage = getStorage(app);
+    googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: "select_account" });
+    googleProvider.addScope("profile");
+    googleProvider.addScope("https://www.googleapis.com/auth/userinfo.profile");
+  }
+} catch (e) {
+  console.warn("Firebase initialization failed:", e);
+}
 
 /**
  * Signs in with Google via popup
  */
 export const signInWithGoogle = async () => {
+  if (!auth || !googleProvider) throw new Error(FIREBASE_NOT_CONFIGURED);
   try {
     console.log("Starting Google sign-in with popup...");
     const result = await signInWithPopup(auth, googleProvider);
@@ -93,6 +106,7 @@ export const signInWithGoogle = async () => {
  * Initiates Google sign-in with redirect (better for mobile)
  */
 export const signInWithGoogleRedirect = async () => {
+  if (!auth || !googleProvider) throw new Error(FIREBASE_NOT_CONFIGURED);
   try {
     console.log("Starting Google sign-in with redirect...");
     await signInWithRedirect(auth, googleProvider);
@@ -112,6 +126,7 @@ export const signInWithGoogleRedirect = async () => {
  * Gets the redirect result after Google sign-in
  */
 export const getGoogleRedirectResult = async () => {
+  if (!auth) throw new Error(FIREBASE_NOT_CONFIGURED);
   try {
     console.log("Checking for Google sign-in redirect result...");
     const result = await getRedirectResult(auth);
@@ -152,6 +167,7 @@ export const getGoogleRedirectResult = async () => {
  * Signs out the current user
  */
 export const signOut = async () => {
+  if (!auth) throw new Error(FIREBASE_NOT_CONFIGURED);
   try {
     await firebaseSignOut(auth);
   } catch (error) {
@@ -164,6 +180,7 @@ export const signOut = async () => {
  * Uploads a profile picture to Firebase Storage
  */
 export const uploadProfilePicture = async (userId: string, file: File): Promise<string> => {
+  if (!storage) throw new Error(FIREBASE_NOT_CONFIGURED);
   try {
     const storageRef = ref(storage, `profile_pictures/${userId}`);
     await uploadBytes(storageRef, file);
@@ -175,5 +192,5 @@ export const uploadProfilePicture = async (userId: string, file: File): Promise<
   }
 };
 
-// Export Firebase instances
+// Export Firebase instances (may be null if not configured)
 export { auth, storage, app };
