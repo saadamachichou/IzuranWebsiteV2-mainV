@@ -1,4 +1,4 @@
-# Dependencies
+# Dependencies (will be installed fresh)
 node_modules
 npm-debug.log*
 
@@ -7,7 +7,9 @@ dist
 
 # Environment files (configure in Coolify dashboard)
 .env
-.env.*
+.env.local
+.env.development
+.env.production
 !.env.example
 
 # Git
@@ -32,11 +34,15 @@ logs
 coverage
 .nyc_output
 
-# Documentation
-*.md
-!README.md
+# Documentation (except README)
+API_DOCUMENTATION.md
+DEPLOYMENT_GUIDE.md
+PROJECT_SETUP.md
+RELEASES_SETUP.md
+TICKETING_SETUP.md
+INVOICEABLE_SERVICES.md
 
-# Development files
+# Source maps
 *.ts.map
 *.js.map
 
@@ -51,17 +57,24 @@ temp
 .replit
 replit.nix
 
-# Database migration scripts (run separately)
+# Database migration shell scripts (run separately)
 db-migrate*.sh
 
-# Attached assets (if not needed in production)
+# Attached assets (development only)
 attached_assets
 
-# Config files not needed in container
+# Development/config files not needed at runtime
 .config
 drizzle.config.ts
-postcss.config.js
-tailwind.config.ts
-tsconfig.json
-vite.config.ts
 components.json
+
+# Test/seed scripts
+test-*.ts
+test-*.js
+add-*.ts
+add-*.js
+check-*.js
+fix-*.ts
+create-product.ts
+setup-tickets.js
+update-artist.json
