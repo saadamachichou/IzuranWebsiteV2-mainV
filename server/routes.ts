@@ -49,6 +49,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API prefix
   const apiPrefix = "/api";
   
+  // Health check endpoint for Docker/Coolify
+  app.get(`${apiPrefix}/health`, async (req, res) => {
+    try {
+      // Basic health check - can add DB ping if needed
+      res.status(200).json({ 
+        status: "ok", 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    } catch (err) {
+      res.status(503).json({ status: "error", message: "Service unavailable" });
+    }
+  });
+  
   // Error handler middleware
   const handleErrors = (err: any, res: any): Response => { // Explicitly set return type to Response
     console.error("API Error:", err);

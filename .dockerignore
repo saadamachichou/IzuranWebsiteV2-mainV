@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build output (will be built in container)
+dist
+
+# Environment files (configure in Coolify dashboard)
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Test files
+coverage
+.nyc_output
+
+# Documentation
+*.md
+!README.md
+
+# Development files
+*.ts.map
+*.js.map
+
+# Temporary files
+tmp
+temp
+.tmp
+.temp
+
+# Cursor/Editor specific
+.cursor
+.replit
+replit.nix
+
+# Database migration scripts (run separately)
+db-migrate*.sh
+
+# Attached assets (if not needed in production)
+attached_assets
+
+# Config files not needed in container
+.config
+drizzle.config.ts
+postcss.config.js
+tailwind.config.ts
+tsconfig.json
+vite.config.ts
+components.json
