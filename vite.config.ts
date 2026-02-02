@@ -37,53 +37,29 @@ export default defineConfig({
       },
       output: {
         manualChunks: (id) => {
-          // Separate node_modules into more granular chunks
+          // Separate node_modules into chunks
           if (id.includes('node_modules')) {
-            // CRITICAL: React, React-DOM, and jsx-runtime MUST be in the same chunk
-            // Put them in react-vendor chunk (will load as dependency of entry)
-            if (id.includes('react') && 
-                !id.includes('react-icons') && 
-                !id.includes('react-social-icons') && 
-                !id.includes('react-resizable-panels') &&
-                !id.includes('react-day-picker') &&
-                !id.includes('react-hot-toast') &&
-                !id.includes('react-helmet') &&
-                !id.includes('@radix-ui/react') &&
-                !id.includes('@stripe/react-stripe-js') &&
-                !id.includes('@tanstack/react-query') &&
-                !id.includes('embla-carousel-react')) {
+            // CRITICAL: ALL React-related packages MUST be in the same chunk
+            // This includes React core AND any package that uses React
+            if (id.includes('react') || 
+                id.includes('@radix-ui') ||
+                id.includes('framer-motion') ||
+                id.includes('@tanstack/react-query') ||
+                id.includes('lucide-react') ||
+                id.includes('wouter') ||
+                id.includes('recharts') ||
+                id.includes('embla-carousel') ||
+                id.includes('cmdk') ||
+                id.includes('vaul') ||
+                id.includes('input-otp')) {
               return 'react-vendor';
             }
-            // Framer Motion - separate chunk for better tree-shaking
-            if (id.includes('framer-motion')) {
-              return 'framer-motion';
-            }
-            // Router
-            if (id.includes('wouter')) {
-              return 'router-vendor';
-            }
-            // React Query
-            if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor';
-            }
-            // Firebase
+            // Firebase - separate chunk (no React dependency)
             if (id.includes('firebase')) {
               return 'firebase-vendor';
             }
-            // Icons - separate chunk but ensure tree-shaking works
-            // lucide-react should be tree-shaken, but we'll put it in its own chunk
-            if (id.includes('lucide-react')) {
-              return 'lucide-icons';
-            }
-            if (id.includes('react-icons')) {
-              return 'react-icons';
-            }
-            // Radix UI components - group together
-            if (id.includes('@radix-ui')) {
-              return 'radix-ui';
-            }
-            // Other large vendor libraries
-            if (id.includes('react-hook-form') || id.includes('zod')) {
+            // Form libraries
+            if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
               return 'form-vendor';
             }
             // Default vendor chunk for other node_modules
