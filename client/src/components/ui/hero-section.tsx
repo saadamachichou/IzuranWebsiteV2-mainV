@@ -108,10 +108,10 @@ export default function HeroSection() {
         <div className="absolute bottom-1/3 left-1/4 w-[30vw] h-[30vw] rounded-full bg-amber-700/5 blur-[90px] animate-pulse-slow" />
       </div>
 
-      {/* Content container */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Animated Logo with Floating Symbols */}
+      {/* Content container - extra top padding on mobile for header + safe area */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 pt-20 sm:pt-0 pb-28 sm:pb-0">
+        <div className="text-center max-w-4xl mx-auto w-full">
+          {/* Animated Logo with Floating Symbols - responsive size for iPhone XR and small screens */}
           <motion.div
             initial={{ scale: 0.8, opacity: 1 }}
             animate={{
@@ -119,32 +119,31 @@ export default function HeroSection() {
               opacity: 1,
             }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            className="mx-auto mb-8 relative flex justify-center items-center"
+            className="mx-auto mb-6 sm:mb-8 relative flex justify-center items-center"
           >
-            {/* Floating Symbols around Logo - Behind the logo */}
+            {/* Floating Symbols - constrained on mobile so they don't overflow */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: logoAnimated ? 1 : 0 }}
               transition={{ duration: 2, delay: 1 }}
-              className="absolute inset-0 w-full h-full z-0"
-              style={{ 
-                width: '600px', 
-                height: '600px',
+              className="absolute z-0"
+              style={{
+                width: 'min(600px, 88vw)',
+                height: 'min(600px, 88vw)',
                 left: '50%',
                 top: '50%',
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
               }}
             >
               <FloatingSymbols density="heavy" area="hero" />
             </motion.div>
-            
-            {/* Logo - In front of the symbols - Made bigger */}
-            <div className="relative z-20" style={{ transform: 'scale(1.5)' }}>
+            {/* Logo - scale down on mobile for better fit on iPhone XR */}
+            <div className="relative z-20 scale-[1.1] sm:scale-[1.3] md:scale-[1.5]">
               <AnimatedLogo size="xl" />
             </div>
           </motion.div>
 
-          {/* Main Title */}
+          {/* Main Title - smaller on narrow screens */}
           <motion.h1
             initial={{ opacity: 1, y: 30 }}
             animate={{
@@ -152,7 +151,7 @@ export default function HeroSection() {
               y: textAnimated ? 0 : 30,
             }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider mb-4 drop-shadow-lg"
+            className="text-4xl sm:text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider mb-3 sm:mb-4 drop-shadow-lg px-1"
             style={{ willChange: 'transform' }}
           >
             IZURAN
@@ -160,13 +159,13 @@ export default function HeroSection() {
 
           {/* Tagline - LCP element, visible immediately */}
           <p
-            className="text-lg md:text-xl text-yellow-100 font-semibold tracking-widest mb-8 drop-shadow"
+            className="text-sm sm:text-lg md:text-xl text-yellow-100 font-semibold tracking-widest mb-6 sm:mb-8 drop-shadow px-1"
             style={{ opacity: 1, transform: 'translateY(0)' }}
           >
             ANCIENT RHYTHMS • FUTURE VISIONS
           </p>
 
-          {/* Description */}
+          {/* Description - readable line length on mobile */}
           <motion.p
             initial={{ opacity: 1, y: 20 }}
             animate={{
@@ -174,7 +173,7 @@ export default function HeroSection() {
               y: textAnimated ? 0 : 20,
             }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            className="text-base md:text-lg text-yellow-50 max-w-4x1 mx-auto mb-10 drop-shadow"
+            className="text-sm sm:text-base md:text-lg text-yellow-50 max-w-4xl mx-auto mb-8 sm:mb-10 drop-shadow px-0.5 leading-relaxed"
             style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif', willChange: 'transform' }}
           >
             Discover the mystical sound of Izuran, where ancestral Amazigh
@@ -182,7 +181,7 @@ export default function HeroSection() {
             immersive journey through time and consciousness.
           </motion.p>
 
-          {/* CTA Button */}
+          {/* CTA Buttons - stack on mobile (iPhone XR) for better tap targets */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{
@@ -190,11 +189,11 @@ export default function HeroSection() {
               y: textAnimated ? 0 : 20,
             }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-            className="flex justify-center gap-4 mt-8 mx-auto"
+            className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
           >
             <Button
               size="lg"
-              className="bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 border-amber-500/50 text-amber-100"
+              className="w-full sm:w-auto min-h-12 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 border-amber-500/50 text-amber-100 text-sm sm:text-base"
               onClick={() => {
                 console.log('Explore the Void clicked!');
                 setIsGalleryOpen(true);
@@ -205,40 +204,40 @@ export default function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="border-amber-700/50 text-amber-200 hover:bg-amber-950/30"
+              className="w-full sm:w-auto min-h-12 border-amber-700/50 text-amber-200 hover:bg-amber-950/30 text-sm sm:text-base"
               onClick={() => setLocation("/releases")}
             >
               LATEST RELEASES
             </Button>
           </motion.div>
-        </div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          className="absolute bottom-20 left-[48%] transform -translate-x-1/2 cursor-pointer"
-          style={{
-            opacity: scrollOpacity,
-            scale: scrollScale,
-          }}
-          onClick={handleScrollDown}
-        >
+          {/* Scroll indicator - directly under LATEST RELEASES */}
           <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{
-              repeat: Number.POSITIVE_INFINITY,
-              duration: 2,
-              ease: "easeInOut",
+            className="flex justify-center mt-8 sm:mt-10 cursor-pointer"
+            style={{
+              opacity: scrollOpacity,
+              scale: scrollScale,
             }}
-            className="flex flex-col items-center"
+            onClick={handleScrollDown}
           >
-            <p className="text-amber-300/70 text-sm mb-2 font-light tracking-widest">
-              SCROLL DOWN
-            </p>
-            <div className="p-2 rounded-full border border-amber-500/20 bg-black/20 backdrop-blur-md">
-              <ArrowDown className="h-5 w-5 text-amber-300/70" />
-            </div>
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{
+                repeat: Number.POSITIVE_INFINITY,
+                duration: 2,
+                ease: "easeInOut",
+              }}
+              className="flex flex-col items-center"
+            >
+              <p className="text-amber-300/70 text-xs sm:text-sm mb-2 font-light tracking-widest">
+                SCROLL DOWN
+              </p>
+              <div className="p-2 rounded-full border border-amber-500/20 bg-black/20 backdrop-blur-md">
+                <ArrowDown className="h-5 w-5 text-amber-300/70" />
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Hidden Gallery */}
