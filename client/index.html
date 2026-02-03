@@ -35,10 +35,23 @@
     
     <!-- Load bfcache patch asynchronously to not block initial render -->
     <script src="/bfcache-patch.js" defer></script>
+    <!-- Initial loading spinner (amber theme) - replaced by React when app mounts -->
+    <style>
+      @keyframes izuran-spin { to { transform: rotate(360deg); } }
+      #root .izuran-loading-spinner {
+        width: 48px; height: 48px;
+        border: 3px solid rgba(245, 158, 11, 0.2);
+        border-top-color: #f59e0b;
+        border-radius: 50%;
+        animation: izuran-spin 0.8s linear infinite;
+      }
+    </style>
   </head>
   <body>
     <div id="root">
-      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0a;color:#f97316;font-family:system-ui,sans-serif;font-size:1.125rem">Loading…</div>
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0a">
+        <div class="izuran-loading-spinner" aria-hidden="true"></div>
+      </div>
     </div>
     <script>
       window.__showAppError = function(msg, err) {

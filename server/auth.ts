@@ -179,11 +179,11 @@ export async function registerUser(req: Request, res: Response) {
     const accessToken = generateAccessToken(newUser as schema.User);
     const refreshToken = generateRefreshToken(newUser as schema.User);
     
-    // Set refresh token in HTTP-only cookie
+    // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 8 * 60 * 60 * 1000 // 8 hours
     });
     
     return res.status(201).json({ 
@@ -226,10 +226,10 @@ export async function loginUser(req: Request, res: Response) {
       maxAge: 15 * 60 * 1000 // 15 minutes
     });
     
-    // Set refresh token in HTTP-only cookie
+    // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity)
     res.cookie('refreshToken', refreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 8 * 60 * 60 * 1000 // 8 hours
     });
     
     // Return user info and access token (for non-cookie clients)
@@ -247,8 +247,9 @@ export function logoutUser(req: Request, res: Response) {
       return res.status(500).json({ message: "Logout failed" });
     }
     
-    // Clear the refresh token cookie
+    // Clear both auth cookies so session is fully ended
     res.clearCookie('refreshToken');
+    res.clearCookie('accessToken');
     
     return res.json({ message: "Logout successful" });
   });
@@ -291,7 +292,7 @@ export async function refreshToken(req: Request, res: Response) {
     // Generate new access token
     const accessToken = generateAccessToken(user);
     
-    // Set security options for cookie
+    // Set security options for cookie (refresh cookie stays 8h)
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -494,11 +495,11 @@ export async function authenticateWithGoogle(req: Request, res: Response) {
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
       
-      // Set refresh token in HTTP-only cookie
+      // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity)
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge: 8 * 60 * 60 * 1000 // 8 hours
       });
       
       return res.status(200).json({

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +9,8 @@ import NotFound from "@/pages/not-found";
 // Lazy load public pages to reduce initial bundle size
 const Home = lazy(() => import('@/pages/home'));
 const Artists = lazy(() => import('@/pages/artists'));
+// Import artist detail eagerly to avoid lazy-chunk resolution issues
+import ArtistDetailPage from '@/pages/artists/[slug]';
 const Events = lazy(() => import('@/pages/events'));
 const Shop = lazy(() => import('@/pages/shop'));
 const Checkout = lazy(() => import('@/pages/checkout'));
@@ -17,7 +19,7 @@ const Podcast = lazy(() => import('@/pages/podcasts/index'));
 const Knowledge = lazy(() => import('@/pages/knowledge'));
 const Contact = lazy(() => import('@/pages/contact'));
 const Auth = lazy(() => import('@/pages/auth'));
-const Releases = lazy(() => import('@/pages/releases'));
+const Releases = lazy(() => import('@/pages/releases/index'));
 // Removed tickets page
 import { Helmet } from "react-helmet";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -72,7 +74,7 @@ const AdminEditProduct = lazy(() => import('./pages/admin/products/[id]/edit'));
 const AdminGallery = lazy(() => import('./pages/admin/gallery'));
 
 // Admin Releases pages
-const AdminReleases = lazy(() => import('./pages/admin/releases'));
+const AdminReleases = lazy(() => import('./pages/admin/releases/index'));
 
 // Admin Contact pages
 const AdminContact = lazy(() => import('./pages/admin/contact'));
@@ -128,26 +130,14 @@ const withLayout = (Component: React.ComponentType<any>) => {
 };
 
 function Router() {
-  // Add scroll to top effect for homepage
+  const [location] = useLocation();
+
+  // Scroll to top when navigating (navbar: Home, Artists, Events, Shop, etc.)
   useEffect(() => {
-    const handleRouteChange = () => {
-      if (window.location.pathname === '/') {
-        // Force scroll to top when navigating to homepage
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
-        }, 50);
-      }
-    };
-    
-    // Listen for route changes
-    window.addEventListener('popstate', handleRouteChange);
-    
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-    };
-  }, []);
+    window.scrollTo({ top: 0, behavior: "instant" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [location]);
 
   return (
     <Suspense fallback={<PageLoading />}>
@@ -155,7 +145,7 @@ function Router() {
         {/* Public Routes with Layout */}
         <Route path="/" component={withLayout(Home)} />
         <Route path="/artists" component={withLayout(Artists)} />
-        <Route path="/artists/:slug" component={withLayout(lazy(() => import('./pages/artists/[slug]')))} />
+        <Route path="/artists/:slug" component={withLayout(ArtistDetailPage)} />
         <Route path="/events" component={withLayout(Events)} />
         <Route path="/events/:slug" component={withLayout(lazy(() => import('./pages/events/[slug]')))} />
         <Route path="/shop" component={withLayout(Shop)} />
@@ -238,6 +228,26 @@ function Router() {
         <Route component={withLayout(NotFound)} />
       </Switch>
     </Suspense>
+  );
+}
+
+function AppContent({ isLoading, setIsInitialLoading, handleLoadingComplete }: {
+  isLoading: boolean;
+  setIsInitialLoading: (v: boolean) => void;
+  handleLoadingComplete: () => void;
+}) {
+  // Let LoadingScreen run its full animation - don't short-circuit for logged-in users
+  return (
+    <>
+      <LoadingScreen isLoading={isLoading} onLoadingComplete={handleLoadingComplete} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 1, ease: "easeInOut" }}
+      >
+        <Router />
+      </motion.div>
+    </>
   );
 }
 
@@ -355,20 +365,11 @@ function App() {
               <title>Izuran - Record Label & Event Promoter</title>
             </Helmet>
             
-            {/* Loading screen - shown only on first visit or homepage reload */}
-            <LoadingScreen 
-              isLoading={isLoading} 
-              onLoadingComplete={handleLoadingComplete}
+            <AppContent
+              isLoading={isLoading}
+              setIsInitialLoading={setIsInitialLoading}
+              handleLoadingComplete={handleLoadingComplete}
             />
-            
-            {/* Main application */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isLoading ? 0 : 1 }}
-              transition={{ duration: 1, ease: "easeInOut" }}
-            >
-              <Router />
-            </motion.div>
             
             <Toaster />
           </CartProvider>

@@ -151,9 +151,55 @@ export default function AdminReleasesPage() {
       embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=2900729510/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/va-catharsis">VA-CATHARSIS de Izuran Records</a></iframe>`,
       coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       tracks: []
+    },
+    {
+      id: "10",
+      title: "EP - Sunken Omen",
+      artist: "Symbiotik",
+      type: "ep",
+      releaseDate: "2024",
+      genre: "Electronic",
+      description: "Deep and immersive electronic soundscapes from Symbiotik.",
+      bandcampUrl: "https://izuranrecords.bandcamp.com/album/ep-sunken-omen",
+      embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=3848567182/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/ep-sunken-omen">EP - Sunken Omen by Symbiotik</a></iframe>`,
+      coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      tracks: []
+    },
+    {
+      id: "11",
+      title: "EP - Baphomet",
+      artist: "Haniba & Friends",
+      type: "ep",
+      releaseDate: "2024",
+      genre: "Electronic",
+      description: "Mystical and ritualistic electronic explorations.",
+      bandcampUrl: "https://izuranrecords.bandcamp.com/album/ep-baphomet",
+      embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=1498184137/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/ep-baphomet">EP - Baphomet by Haniba &amp; Friends</a></iframe>`,
+      coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      tracks: []
+    },
+    {
+      id: "12",
+      title: "EP - Atavistic Echoes",
+      artist: "J-MRGL",
+      type: "ep",
+      releaseDate: "2024",
+      genre: "Electronic",
+      description: "Primordial echoes and ancient rhythms in electronic form.",
+      bandcampUrl: "https://izuranrecords.bandcamp.com/album/ep-atavistic-echoes",
+      embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=1462298002/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/ep-atavistic-echoes">EP - Atavistic Echoes by J-MRGL</a></iframe>`,
+      coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      tracks: []
     }
   ]);
-  
+
+  // Show newest releases (Sunken Omen, Baphomet, Atavistic Echoes) at the top
+  const TOP_RELEASE_IDS = ["10", "11", "12"];
+  const sortedReleases = [
+    ...releases.filter((r) => TOP_RELEASE_IDS.includes(r.id)),
+    ...releases.filter((r) => !TOP_RELEASE_IDS.includes(r.id)),
+  ];
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRelease, setEditingRelease] = useState<Release | null>(null);
   const [formData, setFormData] = useState({
@@ -237,7 +283,7 @@ export default function AdminReleasesPage() {
           {/* Releases Grid */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {releases.map((release) => (
+              {sortedReleases.map((release) => (
                 <Card key={release.id} className="bg-gradient-to-br from-black/60 to-amber-500/5 border-amber-500/30">
                   <CardHeader>
                     <div className="flex justify-between items-start">

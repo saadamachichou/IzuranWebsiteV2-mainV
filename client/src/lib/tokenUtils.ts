@@ -68,11 +68,11 @@ export async function refreshAccessToken(): Promise<string | null> {
 
 /**
  * Check if we might have a valid session (to avoid unnecessary requests)
+ * Uses localStorage so session hint survives reloads and new tabs.
  */
 export function mightHaveValidSession(): boolean {
-  // Check sessionStorage flag to avoid unnecessary requests for users who never logged in
-  return sessionStorage.getItem('hasAuthSession') === 'true' || 
-         !sessionStorage.getItem('authChecked');
+  return localStorage.getItem('hasAuthSession') === 'true' || 
+         !localStorage.getItem('authChecked');
 }
 
 /**
@@ -103,7 +103,7 @@ export async function fetchWithTokenRefresh(
         return fetch(url, requestOptions);
       } else {
         // Refresh failed, clear the session flag
-        sessionStorage.removeItem('hasAuthSession');
+        localStorage.removeItem('hasAuthSession');
       }
     }
     // If refresh failed or no session, return the response without retrying

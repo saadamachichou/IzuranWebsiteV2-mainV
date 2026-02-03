@@ -63,12 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         setIsLoading(true);
         
-        // Check if we have any indication of previous authentication to avoid unnecessary requests
-        // This prevents 401 errors from appearing in network tab for users who never logged in
-        const isInitialLoad = !sessionStorage.getItem('authChecked');
+        // Use localStorage so "remember me" survives reloads and new tabs
+        const isInitialLoad = !localStorage.getItem('authChecked');
         
-        // Skip auth check if we've already checked and there's no auth flag
-        // This reduces unnecessary network requests for unauthenticated users
+        // Skip auth check only if we've already checked and there's no auth flag
         if (!mightHaveValidSession() && !isInitialLoad) {
           setUser(null);
           setIsLoading(false);
@@ -81,19 +79,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
-          sessionStorage.setItem('hasAuthSession', 'true');
+          localStorage.setItem('hasAuthSession', 'true');
         } else {
           // 401 is expected when user is not authenticated - silently handle
           setUser(null);
-          sessionStorage.removeItem('hasAuthSession');
+          localStorage.removeItem('hasAuthSession');
         }
       } catch (err) {
         // Silently handle errors - expected when user is not authenticated
         setUser(null);
-        sessionStorage.removeItem('hasAuthSession');
+        localStorage.removeItem('hasAuthSession');
       } finally {
         setIsLoading(false);
-        sessionStorage.setItem('authChecked', 'true');
+        localStorage.setItem('authChecked', 'true');
       }
     };
 
@@ -128,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       setUser(data.user);
-      sessionStorage.setItem('hasAuthSession', 'true');
+      localStorage.setItem('hasAuthSession', 'true');
     } catch (err: any) {
       setError(err.message || 'Login failed');
       throw err;
@@ -181,9 +179,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(errorData.message || 'Logout failed');
       }
       
-      // Clear auth session flags
-      sessionStorage.removeItem('hasAuthSession');
-      sessionStorage.removeItem('authChecked');
+      // Clear auth session flags (localStorage so they persist across reloads when logged in)
+      localStorage.removeItem('hasAuthSession');
+      localStorage.removeItem('authChecked');
       setUser(null);
       
       // Also sign out of Firebase if user was signed in with Google
@@ -196,9 +194,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       
-      // Clear auth session flags
-      sessionStorage.removeItem('hasAuthSession');
-      sessionStorage.removeItem('authChecked');
+      localStorage.removeItem('hasAuthSession');
+      localStorage.removeItem('authChecked');
       setUser(null);
       
       // Clear profile upload flags for all users

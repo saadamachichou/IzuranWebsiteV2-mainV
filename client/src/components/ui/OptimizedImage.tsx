@@ -64,27 +64,21 @@ export default function OptimizedImage({
     );
   }
 
+  // Render img directly - no wrapper div to avoid extra/unused space in cards
   return (
-    <div className="relative w-full h-full">
-      {imageLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800/50 z-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
-        </div>
-      )}
-      <img
-        src={src}
-        alt={alt}
-        className={`${className} ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-        width={width}
-        height={height}
-        sizes={sizes}
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
-        decoding="async"
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-        {...props}
-      />
-    </div>
+    <img
+      src={src}
+      alt={alt}
+      className={`${className} ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+      width={width}
+      height={height}
+      sizes={sizes}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchPriority={priority ? 'high' : 'auto'}
+      decoding="async"
+      onLoad={handleImageLoad}
+      onError={handleImageError}
+      {...props}
+    />
   );
 }

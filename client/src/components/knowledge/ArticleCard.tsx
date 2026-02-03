@@ -3,7 +3,6 @@ import { Article } from "@shared/schema";
 import { Link } from "wouter";
 import { ArrowRight, FileText, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
-import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface ArticleCardProps {
   article: Article;
@@ -20,13 +19,12 @@ export default function ArticleCard({ article }: ArticleCardProps) {
     >
       <div className="relative w-full h-48 article-image-container overflow-hidden">
         {article.imageUrl ? (
-          <OptimizedImage
+          <img
             src={article.imageUrl}
             alt={article.title}
             className="w-full h-full object-cover object-center article-image"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             loading="lazy"
-            fallback="/placeholder.svg"
+            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center article-image-fallback bg-gradient-to-br from-gray-800 to-gray-700">

@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Event } from "@shared/schema";
 import { Link, useLocation } from "wouter";
 import { Calendar, MapPin, Music, Ticket } from "lucide-react";
-import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface EventCardProps {
   event: Event;
@@ -103,12 +102,12 @@ export default function EventCard({ event }: EventCardProps) {
       whileHover={{ y: -5, boxShadow: "0 10px 30px -15px rgba(245, 158, 11, 0.3)" }}
     >
       <div className="relative overflow-hidden">
-        <OptimizedImage
+        <img
           src={event.imageUrl}
           alt={event.name}
           className="w-full h-96 object-cover object-center border-b border-amber-500/10"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           loading="lazy"
+          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
         />
         <div className={`absolute top-3 right-3 px-3 py-1 rounded text-sm font-medium ${
           event.status === 'completed' 

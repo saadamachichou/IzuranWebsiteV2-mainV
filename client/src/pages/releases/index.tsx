@@ -160,6 +160,45 @@ export default function ReleasesPage() {
       embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=2900729510/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" allow="autoplay" seamless><a href="https://izuranrecords.bandcamp.com/album/va-catharsis">VA-CATHARSIS de Izuran Records</a></iframe>`,
       coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       tracks: []
+    },
+    {
+      id: "10",
+      title: "EP - Sunken Omen",
+      artist: "Symbiotik",
+      type: "ep",
+      releaseDate: "2024",
+      genre: "Electronic",
+      description: "Deep and immersive electronic soundscapes from Symbiotik.",
+      bandcampUrl: "https://izuranrecords.bandcamp.com/album/ep-sunken-omen",
+      embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=3848567182/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/ep-sunken-omen">EP - Sunken Omen by Symbiotik</a></iframe>`,
+      coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      tracks: []
+    },
+    {
+      id: "11",
+      title: "EP - Baphomet",
+      artist: "Haniba & Friends",
+      type: "ep",
+      releaseDate: "2024",
+      genre: "Electronic",
+      description: "Mystical and ritualistic electronic explorations.",
+      bandcampUrl: "https://izuranrecords.bandcamp.com/album/ep-baphomet",
+      embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=1498184137/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/ep-baphomet">EP - Baphomet by Haniba &amp; Friends</a></iframe>`,
+      coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      tracks: []
+    },
+    {
+      id: "12",
+      title: "EP - Atavistic Echoes",
+      artist: "J-MRGL",
+      type: "ep",
+      releaseDate: "2024",
+      genre: "Electronic",
+      description: "Primordial echoes and ancient rhythms in electronic form.",
+      bandcampUrl: "https://izuranrecords.bandcamp.com/album/ep-atavistic-echoes",
+      embedCode: `<iframe style="border: 0; width: 350px; height: 470px;" src="https://bandcamp.com/EmbeddedPlayer/album=1462298002/size=large/bgcol=333333/linkcol=e99708/tracklist=false/transparent=true/" seamless><a href="https://izuranrecords.bandcamp.com/album/ep-atavistic-echoes">EP - Atavistic Echoes by J-MRGL</a></iframe>`,
+      coverArt: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      tracks: []
     }
   ]);
   
@@ -172,6 +211,13 @@ export default function ReleasesPage() {
     if (filter === 'va') return release.type === 'compilation';
     return true;
   });
+
+  // Show newest releases (Sunken Omen, Baphomet, Atavistic Echoes) at the top
+  const TOP_RELEASE_IDS = ["10", "11", "12"];
+  const sortedReleases = [
+    ...filteredReleases.filter((r) => TOP_RELEASE_IDS.includes(r.id)),
+    ...filteredReleases.filter((r) => !TOP_RELEASE_IDS.includes(r.id)),
+  ];
 
   return (
     <div className="relative min-h-screen bg-black font-ami-r">
@@ -276,7 +322,7 @@ export default function ReleasesPage() {
                  VA
                </Button>
                <div className="ml-2 text-amber-300/60 text-sm">
-                 ({filteredReleases.length} {filteredReleases.length === 1 ? 'release' : 'releases'})
+                 ({sortedReleases.length} {sortedReleases.length === 1 ? 'release' : 'releases'})
                </div>
              </div>
            </motion.div>
@@ -288,7 +334,7 @@ export default function ReleasesPage() {
              transition={{ duration: 0.6, delay: 0.3 }}
              className="releases-grid"
            >
-             {filteredReleases.map((release) => (
+             {sortedReleases.map((release) => (
                <Card key={release.id} className="releases-card group bg-gradient-to-br from-black/80 to-amber-500/10 border-amber-500/40 hover:border-amber-400/60 hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-500 overflow-hidden transform hover:scale-[1.02]">
                  <CardHeader className="pb-3 px-4 pt-4">
                    <CardTitle className="text-amber-100 text-lg font-bold text-center leading-tight" style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}>

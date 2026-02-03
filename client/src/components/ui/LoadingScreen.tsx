@@ -50,14 +50,14 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
       setOpacity(1);
     }, 200);
 
-    // Simulate loading progress with optimized pace for 1.5 seconds total
+    // Simulate loading progress - 7 seconds total (2s progress + 4s hold + 1s fade)
     const progressInterval = setInterval(() => {
       setProgress((prevProgress) => {
-        // Progress increment to reach 100% in exactly 1 second
-        const increment = 10; // 10% every 100ms = 100% in 1 second (10 intervals * 100ms = 1000ms = 1s)
+        // Progress increment to reach 100% in 2 seconds
+        const increment = 5; // 5% every 100ms = 100% in 2 seconds
         const newProgress = Math.min(prevProgress + increment, 100);
 
-        // When we reach 100%, clear the interval and set loading to false after brief delay
+        // When we reach 100%, hold for 4 seconds (6s total), then 1s fade = 7s
         if (newProgress >= 100) {
           clearInterval(progressInterval);
           setTimeout(() => {
@@ -84,12 +84,12 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
             if (onLoadingComplete) {
               onLoadingComplete();
             }
-          }, 500); // Brief delay after reaching 100% (Total: 1.5 seconds)
+          }, 4000); // 4 second hold at 100% (Total: 6s + 1s fade = 7s)
         }
 
         return newProgress;
       });
-    }, 100); // 100ms interval: 10% every 100ms = 100% in exactly 1 second
+    }, 100); // 100ms interval: 5% every 100ms = 100% in 2 seconds
 
     return () => {
       clearTimeout(fadeInTimeout);
@@ -110,7 +110,7 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
           className="fixed inset-0 flex items-center justify-center bg-black z-50"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
+          transition={{ duration: 1, ease: "easeInOut" }}
         >
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Particles behind everything */}
@@ -152,12 +152,12 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
                 />
               </motion.div>
 
-              {/* Text below logo */}
+              {/* Text below logo - appears early so it's readable */}
               <motion.div
                 className="mt-4 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.2, duration: 1 }}
+                transition={{ delay: 0.5, duration: 1 }}
               >
                 <p className="text-[#ffdf85] font-medium tracking-widest text-lg md:text-xl">
                   ANCIENT RHYTHMS - FUTURE VISION
@@ -165,12 +165,12 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
               </motion.div>
             </motion.div>
 
-            {/* Loading Bar */}
+            {/* Loading Bar - appears early */}
             <motion.div
               className="absolute bottom-24 left-0 right-0 mx-auto w-64 md:w-80 flex flex-col items-center gap-3 z-30"
               initial={{ opacity: 0 }}
               animate={{ opacity: opacity }}
-              transition={{ delay: 1, duration: 1 }}
+              transition={{ delay: 0.4, duration: 1 }}
             >
               <div className="w-full h-1.5 bg-black/30 rounded-full overflow-hidden backdrop-blur-sm border border-[#b16e29]/30 relative">
                 {/* Glow effect behind the bar */}
@@ -232,10 +232,10 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
             </motion.div>
 
             <motion.div
-              className="absolute bottom-12 left-0 right-0 text-center text-[#ffdf85]/80 text-sm z-30"
+              className="absolute bottom-12 left-0 right-0 text-center text-[#ffdf85]/90 text-base md:text-lg z-30"
               initial={{ opacity: 0 }}
               animate={{ opacity: opacity }}
-              transition={{ delay: 1.5, duration: 1 }}
+              transition={{ delay: 0.8, duration: 1 }}
             >
               <motion.p
                 animate={{

@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Artist } from "@shared/schema";
 import { motion } from "framer-motion";
 import { Instagram, ArrowRight } from "lucide-react";
 import { SoundCloudIcon, BandcampIcon } from "@/components/icons/BrandIcons";
 import { truncateText, DESCRIPTION_LIMIT } from "@/lib/text-utils";
-import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export default function FeaturedArtists() {
+  const [, setLocation] = useLocation();
   const { data: artists, isLoading, error } = useQuery<Artist[]>({
     queryKey: ['/api/artists'],
   });
@@ -73,30 +73,36 @@ export default function FeaturedArtists() {
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Featured Artists</span>
         </motion.h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-start">
           {featuredArtists.map((artist, index) => (
             <motion.div 
               key={artist.id}
-              className="glassmorphism rounded-lg p-6 transition-all glow-card border border-amber-500/20 hover:border-amber-500/40"
+              className="glassmorphism rounded-lg p-6 transition-all glow-card border border-amber-500/20 hover:border-amber-500/40 cursor-pointer"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
+              onClick={() => setLocation(`/artists/${artist.slug || artist.id}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLocation(`/artists/${artist.slug || artist.id}`); } }}
             >
-              <div className="w-full h-64 overflow-hidden rounded mb-4">
-                <OptimizedImage
-                  src={artist.image_Url || '/placeholder-artist.jpg'}
+              <div className="w-full h-64 overflow-hidden rounded mb-4 flex-shrink-0">
+                <img
+                  src={artist.image_Url || '/placeholder.svg'}
                   alt={artist.name}
-                  className="w-full h-full object-cover object-center"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="w-full h-full object-cover object-center block"
                   loading="lazy"
-                  fallback="/placeholder-artist.jpg"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
                 />
               </div>
               <h3 className="text-xl font-bold font-space text-white mb-2">{artist.name}</h3>
               <p className="text-sm md:text-base text-yellow-50 mb-4 line-clamp-3 drop-shadow" style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}>{truncateText(artist.description || "", DESCRIPTION_LIMIT)}</p>
-              <div className="flex justify-between items-center">
-                <Link href={`/artists/${artist.id}`} className="text-amber-400 hover:text-amber-200 transition-all flex items-center">
+              <div className="flex justify-between items-center" onClick={(e) => e.stopPropagation()}>
+                <Link 
+                  href={`/artists/${artist.slug || artist.id}`}
+                  className="text-amber-400 hover:text-amber-200 transition-all flex items-center font-medium cursor-pointer"
+                >
                   See profile <ArrowRight size={16} className="ml-1" />
                 </Link>
                 <div className="flex space-x-2">

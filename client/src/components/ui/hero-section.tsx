@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import AnimatedLogo from "@/components/ui/animated-logo";
 import FloatingSymbols from "@/components/ui/floating-symbols";
 import HiddenGallery from "@/components/home/HiddenGallery";
 
 export default function HeroSection() {
+  const [, setLocation] = useLocation();
   // For scroll indicator animation
   const { scrollY } = useScroll();
   const scrollOpacity = useTransform(scrollY, [0, 200], [1, 0]);
@@ -204,6 +206,7 @@ export default function HeroSection() {
               size="lg"
               variant="outline"
               className="border-amber-700/50 text-amber-200 hover:bg-amber-950/30"
+              onClick={() => setLocation("/releases")}
             >
               LATEST RELEASES
             </Button>

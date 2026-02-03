@@ -140,8 +140,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(`${apiPrefix}/artists/:slug`, async (req, res) => {
     try {
-      // Check if slug is a number (ID) or string (slug)
-      const isId = !isNaN(parseInt(req.params.slug));
+      // Only treat as ID when the entire param is digits (e.g. "3" not "3PL7VEN")
+      const isId = /^\d+$/.test(req.params.slug);
       
       let artist;
       if (isId) {
@@ -342,8 +342,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(`${apiPrefix}/events/:slug`, async (req, res) => {
     try {
-      // Check if slug is a number (ID) or string (slug)
-      const isId = !isNaN(parseInt(req.params.slug));
+      // Only treat as ID when the entire param is digits (e.g. "3" not "3PL7VEN")
+      const isId = /^\d+$/.test(req.params.slug);
       
       let event;
       if (isId) {
@@ -504,8 +504,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(`${apiPrefix}/products/:slug`, async (req, res) => {
     try {
-      // Check if slug is a number (ID) or string (slug)
-      const isId = !isNaN(parseInt(req.params.slug));
+      // Only treat as ID when the entire param is digits (e.g. "3" not "3PL7VEN")
+      const isId = /^\d+$/.test(req.params.slug);
       
       let product;
       if (isId) {
@@ -626,8 +626,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(`${apiPrefix}/podcasts/:slug`, async (req, res) => {
     try {
       console.log(`Server: Received request for podcast by slug/ID: ${req.params.slug}`); // Debug log
-      // Check if slug is a number (ID) or string (slug)
-      const isId = !isNaN(parseInt(req.params.slug));
+      // Only treat as ID when the entire param is digits (e.g. "3" not "3PL7VEN")
+      const isId = /^\d+$/.test(req.params.slug);
       
       let podcast;
       if (isId) {
@@ -864,8 +864,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(`${apiPrefix}/articles/:slug`, async (req, res) => {
     try {
-      // Check if slug is a number (ID) or string (slug)
-      const isId = !isNaN(parseInt(req.params.slug));
+      // Only treat as ID when the entire param is digits (e.g. "3" not "3PL7VEN")
+      const isId = /^\d+$/.test(req.params.slug);
       
       let article;
       if (isId) {

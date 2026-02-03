@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useLocation } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, Music, Globe, Link, Instagram, Facebook } from "lucide-react";
 import { SoundCloudIcon, BandcampIcon, LinktreeIcon } from "@/components/icons/BrandIcons";
@@ -7,22 +7,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Artist } from "@shared/schema.ts";
+import { Artist } from "@shared/schema";
 import { Helmet } from "react-helmet";
 
 export default function ArtistDetailPage() {
-  const params = useParams();
+  const [, params] = useRoute("/artists/:slug");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [artist, setArtist] = useState<Artist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const slug = params?.slug;
+
+  // Scroll to top when entering artist profile (e.g. from "See profile" click)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   useEffect(() => {
-    if (params.slug) {
-      fetchArtist(params.slug);
+    if (slug) {
+      fetchArtist(slug);
+    } else {
+      setLoading(false);
     }
-  }, [params.slug]);
+  }, [slug]);
 
   const fetchArtist = async (slug: string) => {
     try {
@@ -157,13 +165,12 @@ export default function ArtistDetailPage() {
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="w-full h-full"
                       >
-                        <OptimizedImage
-                          src={artist.image_Url || '/placeholder-artist.jpg'}
+                        <img
+                          src={artist.image_Url || '/placeholder.svg'}
                           alt={artist.name}
                           className="w-full h-full object-cover"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           loading="lazy"
-                          fallback="/placeholder-artist.jpg"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
                         />
                       </motion.div>
                       
@@ -201,21 +208,21 @@ export default function ArtistDetailPage() {
                   transition={{ delay: 0.5 }}
                 >
                   <Card className="bg-black/80 border-amber-500/30 hover:border-amber-500/50 transition-all duration-300 backdrop-blur-sm">
-                    <CardContent className="p-8">
-                      <h2 className="text-2xl font-bold text-amber-300 mb-6 flex items-center gap-3">
-                        <Globe className="w-6 h-6 text-amber-400" />
+                    <CardContent className="p-6">
+                      <h2 className="text-xl font-bold text-amber-300 mb-4 flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-amber-400" />
                         Connect with {artist.name}
                       </h2>
-                      <div className="flex flex-wrap gap-4 justify-center">
+                      <div className="flex flex-wrap gap-3 justify-center">
                         {artist.facebook && (
                           <a
                             href={artist.facebook}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group w-16 h-16 bg-[#1877F2] rounded-xl flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl hover:shadow-[#1877F2]/30 transition-all duration-300"
+                            className="group w-12 h-12 bg-[#1877F2] rounded-lg flex items-center justify-center shadow-md hover:scale-110 hover:shadow-lg hover:shadow-[#1877F2]/30 transition-all duration-300"
                             aria-label={`${artist.name} on Facebook`}
                           >
-                            <Facebook className="w-8 h-8 text-white" />
+                            <Facebook className="w-6 h-6 text-white" />
                           </a>
                         )}
                         {artist.instagram && (
@@ -223,10 +230,10 @@ export default function ArtistDetailPage() {
                             href={artist.instagram}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group w-16 h-16 bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl hover:shadow-pink-500/30 transition-all duration-300"
+                            className="group w-12 h-12 bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center shadow-md hover:scale-110 hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300"
                             aria-label={`${artist.name} on Instagram`}
                           >
-                            <Instagram className="w-8 h-8 text-white" />
+                            <Instagram className="w-6 h-6 text-white" />
                           </a>
                         )}
                         {artist.soundcloud && (
@@ -234,10 +241,10 @@ export default function ArtistDetailPage() {
                             href={artist.soundcloud}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group w-16 h-16 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl hover:shadow-orange-500/30 transition-all duration-300"
+                            className="group w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center shadow-md hover:scale-110 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
                             aria-label={`${artist.name} on SoundCloud`}
                           >
-                            <SoundCloudIcon className="w-8 h-8 text-white" />
+                            <SoundCloudIcon className="w-6 h-6 text-white" />
                           </a>
                         )}
                         {artist.bandcamp && (
@@ -245,10 +252,10 @@ export default function ArtistDetailPage() {
                             href={artist.bandcamp}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group w-16 h-16 bg-[#629aa9] rounded-xl flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl hover:shadow-[#629aa9]/30 transition-all duration-300"
+                            className="group w-12 h-12 bg-[#629aa9] rounded-lg flex items-center justify-center shadow-md hover:scale-110 hover:shadow-lg hover:shadow-[#629aa9]/30 transition-all duration-300"
                             aria-label={`${artist.name} on Bandcamp`}
                           >
-                            <BandcampIcon className="w-8 h-8 text-white" />
+                            <BandcampIcon className="w-6 h-6 text-white" />
                           </a>
                         )}
                         {artist.linktree && (
@@ -256,10 +263,10 @@ export default function ArtistDetailPage() {
                             href={artist.linktree}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group w-16 h-16 bg-[#39e09b] rounded-xl flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl hover:shadow-[#39e09b]/30 transition-all duration-300"
+                            className="group w-12 h-12 bg-[#39e09b] rounded-lg flex items-center justify-center shadow-md hover:scale-110 hover:shadow-lg hover:shadow-[#39e09b]/30 transition-all duration-300"
                             aria-label={`${artist.name} on Linktree`}
                           >
-                            <LinktreeIcon className="w-8 h-8 text-white" />
+                            <LinktreeIcon className="w-6 h-6 text-white" />
                           </a>
                         )}
                       </div>

@@ -3,14 +3,15 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Artist } from "@shared/schema";
 import { motion } from "framer-motion";
-import { Instagram, ArrowRight, Search, Facebook } from "lucide-react";
+import { Search, Instagram, ArrowRight, Facebook } from "lucide-react";
 import { SoundCloudIcon, BandcampIcon } from "@/components/icons/BrandIcons";
 import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { truncateText, DESCRIPTION_LIMIT } from "@/lib/text-utils";
-import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export default function Artists() {
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
   
@@ -21,7 +22,7 @@ export default function Artists() {
   // Filter artists based on search query
   const filteredArtists = artists?.filter(artist => 
     artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    artist.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (artist.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const toggleDescription = (artistId: string) => {
@@ -57,7 +58,7 @@ export default function Artists() {
           </div>
         </div>
 
-        <main className="py-8">
+        <main className="py-16">
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               className="mb-12 max-w-md mx-auto"
@@ -81,7 +82,7 @@ export default function Artists() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="glassmorphism rounded-lg p-6 animate-pulse border border-amber-500/20">
-                    <div className="w-full h-64 bg-amber-600/30 rounded mb-4" />
+                    <div className="w-full h-96 bg-amber-600/30 rounded mb-4" />
                     <div className="h-6 bg-amber-600/30 rounded w-3/4 mb-2" />
                     <div className="h-4 bg-amber-600/20 rounded w-full mb-4" />
                     <div className="flex justify-between items-center">
@@ -101,48 +102,54 @@ export default function Artists() {
                 <p className="text-gray-400">Please check back later.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 {filteredArtists && filteredArtists.length > 0 ? (
                   filteredArtists.map((artist, index) => (
                     <motion.div 
                       key={artist.id}
-                      className="glassmorphism rounded-lg p-6 transition-all glow-card"
+                      className="glassmorphism rounded-lg p-6 transition-all glow-card border border-amber-500/20 hover:border-amber-500/40 cursor-pointer"
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
+                      onClick={() => setLocation(`/artists/${artist.slug || artist.id}`)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLocation(`/artists/${artist.slug || artist.id}`); } }}
                     >
-                      <OptimizedImage
-                        src={artist.image_Url || '/placeholder-artist.jpg'}
-                        alt={artist.name}
-                        className="w-full h-80 object-cover rounded mb-4"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        loading="lazy"
-                        fallback="/placeholder-artist.jpg"
-                      />
-                      <h3 className="text-xl font-bold font-space text-white mb-2">{artist.name}</h3>
-                      <div className="text-amber-200/80 mb-4">
-                        <p className="line-clamp-3" style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}>
-                          {expandedDescriptions[String(artist.id)] 
-                            ? artist.description 
-                            : truncateText(artist.description || "", DESCRIPTION_LIMIT)}
-                        </p>
-                        {artist.description && artist.description.length > DESCRIPTION_LIMIT && (
-                          <button
-                            onClick={() => toggleDescription(String(artist.id))}
-                            className="text-amber-400 hover:text-amber-300 text-sm mt-1 transition-colors"
-                            style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}
-                          >
-                            {expandedDescriptions[String(artist.id)] ? "Show less" : "Read more"}
-                          </button>
-                        )}
+                      <div className="w-full h-96 overflow-hidden rounded mb-4 flex-shrink-0 bg-black/40 flex items-center justify-center">
+                        <img
+                          src={artist.image_Url || '/placeholder.svg'}
+                          alt={artist.name}
+                          className="w-full h-full object-contain object-center block"
+                          loading="lazy"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                        />
                       </div>
-                      <div className="flex justify-between items-center">
-                        <Link href={`/artists/${artist.id}`} className="text-amber-400 hover:text-amber-300 transition-all flex items-center font-medium">
+                      <h3 className="text-xl font-bold font-space text-white mb-2">{artist.name}</h3>
+                      <p className="text-sm md:text-base text-yellow-50 mb-4 line-clamp-3 drop-shadow" style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}>
+                        {expandedDescriptions[String(artist.id)] 
+                          ? (artist.description || "No description available.") 
+                          : truncateText(artist.description || "No description available.", DESCRIPTION_LIMIT)}
+                      </p>
+                      {artist.description && artist.description.length > DESCRIPTION_LIMIT && (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="text-amber-400 hover:text-amber-300 text-sm mt-1 transition-colors cursor-pointer inline-block"
+                          style={{ fontFamily: 'Tahoma, Geneva, Verdana, sans-serif' }}
+                          onClick={(e) => { e.stopPropagation(); toggleDescription(String(artist.id)); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); toggleDescription(String(artist.id)); } }}
+                        >
+                          {expandedDescriptions[String(artist.id)] ? "Show less" : "Read more"}
+                        </span>
+                      )}
+                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-amber-500/20">
+                        <Link href={`/artists/${artist.slug || artist.id}`} className="text-amber-400 hover:text-amber-200 transition-all flex items-center font-medium" onClick={(e) => e.stopPropagation()}>
                           See profile <ArrowRight size={16} className="ml-1" />
                         </Link>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
                           {artist.instagram && (
-                            <a href={artist.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-500 transition-all" aria-label={`${artist.name} on Instagram`}>
+                            <a href={artist.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-amber-400 transition-all" aria-label={`${artist.name} on Instagram`}>
                               <Instagram size={18} />
                             </a>
                           )}

@@ -33,8 +33,10 @@ export default function Footer() {
               <Button variant="ghost" size="icon" aria-label="Facebook" className="text-gray-400 hover:text-blue-500 hover:bg-amber-500/10 transition-all">
                 <Facebook className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" aria-label="Instagram" className="text-gray-400 hover:text-pink-500 hover:bg-amber-500/10 transition-all">
-                <Instagram className="h-5 w-5" />
+              <Button variant="ghost" size="icon" aria-label="Instagram" className="text-gray-400 hover:text-pink-500 hover:bg-amber-500/10 transition-all" asChild>
+                <a href="https://www.instagram.com/izuran.records/" target="_blank" rel="noopener noreferrer">
+                  <Instagram className="h-5 w-5" />
+                </a>
               </Button>
               <Button variant="ghost" size="icon" aria-label="Twitter" className="text-gray-400 hover:text-cyan-400 hover:bg-amber-500/10 transition-all">
                 <Twitter className="h-5 w-5" />
@@ -142,7 +144,7 @@ export default function Footer() {
               <li className="flex items-center">
                 <BandcampIcon className="h-4 w-4 mr-2 text-cyan-500" />
                 <a 
-                  href="https://bandcamp.com/izuranrecords" 
+                  href="https://izuranrecords.bandcamp.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-base text-amber-200/80 hover:text-cyan-500 transition-colors"

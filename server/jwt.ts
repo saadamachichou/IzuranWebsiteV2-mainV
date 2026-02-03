@@ -8,7 +8,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'izuran-jwt-refresh
 
 // Token expiration times
 const ACCESS_TOKEN_EXPIRY = '15m'; // 15 minutes
-const REFRESH_TOKEN_EXPIRY = '7d'; // 7 days
+const REFRESH_TOKEN_EXPIRY = '8h'; // 8 hours - session ends after 8h inactivity
 
 // Interface for JWT payload
 export interface JwtPayload {

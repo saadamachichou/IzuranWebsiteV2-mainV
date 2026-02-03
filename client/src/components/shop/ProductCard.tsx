@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingCart, ExternalLink, Star, Package } from 'lucide-react';
 import { Product } from '@shared/schema';
-import OptimizedImage from '@/components/ui/OptimizedImage';
 
 // Format price with proper currency symbol
 const formatPrice = (price: string | number, currency: string = 'USD') => {
@@ -64,12 +63,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         <div className="relative overflow-hidden">
           <div className="aspect-[2/3] relative bg-gray-900 overflow-hidden">
             {product.imageUrl ? (
-              <OptimizedImage
+              <img
                 src={product.imageUrl}
                 alt={product.name}
                 className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 loading="lazy"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-700">
