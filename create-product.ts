@@ -1,9 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
+import pg from 'pg';
+const { Pool } = pg;
 import 'dotenv/config';
-
-// Configure Neon to use WebSocket
-neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL must be set');

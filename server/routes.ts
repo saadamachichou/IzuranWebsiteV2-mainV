@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { ZodError } from "zod";
 import * as schema from "@shared/schema";
-import { db } from "@db";
+import { db, pool } from "@db";
 import { eq, and, asc, desc, sql, gte } from "drizzle-orm";
 import fetch from 'node-fetch';
 import passport from "passport";
@@ -52,7 +52,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Docker/Coolify
   app.get(`${apiPrefix}/health`, async (req, res) => {
     try {
-      // Basic health check - can add DB ping if needed
       res.status(200).json({ 
         status: "ok", 
         timestamp: new Date().toISOString(),
@@ -60,6 +59,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (err) {
       res.status(503).json({ status: "error", message: "Service unavailable" });
+    }
+  });
+
+  // Database health check - use to debug 500 errors on production
+  app.get(`${apiPrefix}/health/db`, async (req, res) => {
+    try {
+      await pool.query("SELECT 1");
+      res.status(200).json({ 
+        status: "ok", 
+        database: "connected",
+        hasDatabaseUrl: !!process.env.DATABASE_URL
+      });
+    } catch (err) {
+      console.error("Database health check failed:", err);
+      res.status(503).json({ 
+        status: "error", 
+        database: "disconnected",
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        error: err instanceof Error ? err.message : "Unknown error"
+      });
     }
   });
 

@@ -23,9 +23,14 @@ const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Configure CORS with specific options for local development
+// Configure CORS - allow localhost and production domain
 app.use(cors({
-  origin: 'http://localhost:3000', // or your frontend URL
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://izuranrecords.com',
+    'https://www.izuranrecords.com'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -54,7 +59,7 @@ app.use(cookieParser());
 
 // Handle CORS preflight requests more permissively
 app.options('*', cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'https://izuranrecords.com', 'https://www.izuranrecords.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
