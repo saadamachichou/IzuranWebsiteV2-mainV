@@ -69,7 +69,7 @@ export default function AuthPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <Card className="bg-black/60 backdrop-blur-xl border-amber-500/20 shadow-2xl">
-                <CardHeader className="text-center space-y-2">
+                <CardHeader className="font-montserrat text-center space-y-2">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -116,7 +116,7 @@ export default function AuthPage() {
                   </motion.div>
                 </CardContent>
                 
-                <CardFooter className="flex justify-center text-sm text-amber-200/50">
+                <CardFooter className="font-montserrat flex justify-center text-sm text-amber-200/50">
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -208,7 +208,7 @@ export default function AuthPage() {
               </p>
             </motion.div>
             
-            <div className="space-y-4">
+            <div className="font-montserrat space-y-4">
               {features.map((feature, i) => (
                 <motion.div
                   key={i}

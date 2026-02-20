@@ -78,7 +78,7 @@ export default function Newsletter() {
               <input 
                 type="email" 
                 placeholder="Your email address" 
-                className="newsletter-input flex-1 px-5 py-3 bg-black bg-opacity-50 border border-amber-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+                className="font-montserrat newsletter-input flex-1 px-5 py-3 bg-black bg-opacity-50 border border-amber-500/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -86,7 +86,7 @@ export default function Newsletter() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="px-6 py-3 bg-amber-600 text-black font-medium rounded-md hover:bg-amber-700 transition-all disabled:opacity-70"
+                className="font-montserrat px-6 py-3 bg-amber-600 text-black font-medium rounded-md hover:bg-amber-700 transition-all disabled:opacity-70"
               >
                 {isSubmitting ? "Subscribing..." : "Subscribe"}
               </button>

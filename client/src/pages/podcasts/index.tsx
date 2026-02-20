@@ -89,7 +89,7 @@ export default function Podcasts() {
                     </CardHeader>
                     <CardContent className="relative z-10 p-8 pt-0 flex-shrink-0">
                       <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-500/10 to-transparent rounded-lg border border-amber-500/20 group-hover:border-amber-400/40 group-hover:from-amber-500/20 transition-all duration-300">
-                        <span className="text-amber-300 group-hover:text-amber-200 font-semibold transition-colors">
+                        <span className="font-montserrat text-amber-300 group-hover:text-amber-200 font-semibold transition-colors">
                           Explore Podcasts
                         </span>
                         <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export default function Podcasts() {
                     </CardHeader>
                     <CardContent className="relative z-10 p-8 pt-0 flex-shrink-0">
                       <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-500/10 to-transparent rounded-lg border border-purple-500/20 group-hover:border-purple-400/40 group-hover:from-purple-500/20 transition-all duration-300">
-                        <span className="text-purple-300 group-hover:text-purple-200 font-semibold transition-colors">
+                        <span className="font-montserrat text-purple-300 group-hover:text-purple-200 font-semibold transition-colors">
                           Watch Live Streams
                         </span>
                         <div className="flex items-center gap-2">

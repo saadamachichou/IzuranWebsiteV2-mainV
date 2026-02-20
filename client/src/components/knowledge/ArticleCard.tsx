@@ -40,7 +40,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       </div>
       
       <div className="article-card-body p-6">
-        <span className="inline-block px-3 py-1 bg-amber-600 text-black text-xs font-semibold rounded-full mb-3 w-fit">
+        <span className="font-montserrat inline-block px-3 py-1 bg-amber-600 text-black text-xs font-semibold rounded-full mb-3 w-fit">
           {article.category}
         </span>
         <h3 className="text-xl font-bold font-space text-white mb-3 line-clamp-2">{article.title}</h3>
@@ -51,7 +51,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         </p>
         
         <div className="flex justify-between items-center mt-auto">
-          <span className="text-sm text-amber-400/60">
+          <span className="font-montserrat text-sm text-amber-400/60">
             {format(new Date(article.publishDate), 'MMMM d, yyyy')}
           </span>
           <Link href={`/knowledge/${article.slug}`} className="text-amber-400 hover:text-amber-200 transition-all flex items-center text-sm font-medium">

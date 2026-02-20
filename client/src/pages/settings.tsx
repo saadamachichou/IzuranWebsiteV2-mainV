@@ -184,7 +184,7 @@ export default function SettingsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button 
                       variant={language === "en" ? "default" : "outline"}
                       className={`flex justify-start space-x-2 h-auto py-3 ${
@@ -217,21 +217,6 @@ export default function SettingsPage() {
                       </div>
                     </Button>
                     
-                    <Button 
-                      variant={language === "fr" ? "default" : "outline"}
-                      className={`flex justify-start space-x-2 h-auto py-3 ${
-                        language === "fr"
-                          ? "bg-amber-600 text-white hover:bg-amber-700"
-                          : "border-amber-500/30 hover:bg-amber-500/20 text-amber-50 hover:text-amber-50"
-                      }`}
-                      onClick={() => setLanguage("fr")}
-                    >
-                      <Globe className="h-5 w-5 text-amber-400" />
-                      <div className="text-left">
-                        <div className="font-medium">Français</div>
-                        <div className="text-xs text-amber-300">French</div>
-                      </div>
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

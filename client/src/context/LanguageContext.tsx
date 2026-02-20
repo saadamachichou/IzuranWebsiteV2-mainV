@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 // Language options
-export type Language = 'en' | 'tmz' | 'fr';
+export type Language = 'en' | 'tmz';
 
 type Translations = {
   [key: string]: {
@@ -202,6 +202,7 @@ const translations: Translations = {
     'Increase Quantity': 'ⵔⵏⵓ ⵜⴰⵏⴳⴰⵎⵜ',
     'Remove Item': 'ⴽⴽⵙ ⴰⴼⵔⴷⵉⵙ',
     'Subtotal': 'ⴰⵙⵉⵎⴹⵢⴰⵏ',
+    'navbar.login': 'ⴽⵛⵎ',
     'Total': 'ⴰⵎⴹⴰⵢⴰⵏ',
     'Clear Cart': 'ⵙⴼⵓⴼⴷ ⵜⴰⴽⵔⵔⵓⵙⵜ',
     'Checkout': 'ⴼⴼⵖ ⵙ ⵡⴰⴷⴰⴼ',
@@ -493,8 +494,9 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem('language') as Language;
-    return savedLanguage || 'en';
+    const savedLanguage = localStorage.getItem('language') as string;
+    if (savedLanguage === 'fr') return 'en'; // Migrate former French users to English
+    return (savedLanguage === 'en' || savedLanguage === 'tmz') ? savedLanguage : 'en';
   });
 
   useEffect(() => {
@@ -502,7 +504,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   const t = (key: string): string => {
-    return translations[language][key] || key; // Fallback to key if translation not found
+    return translations[language][key] || translations.en[key] || key; // Fallback to English, then key
   };
 
   return (

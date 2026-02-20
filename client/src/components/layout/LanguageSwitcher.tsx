@@ -19,7 +19,6 @@ type Language = {
 const languages: Language[] = [
   { code: "en", name: "English", flag: "🇬🇧" },
   { code: "tmz", name: "Tamazight", flag: "🇲🇦" },
-  { code: "fr", name: "Français", flag: "🇫🇷" },
 ];
 
 export default function LanguageSwitcher() {
@@ -30,7 +29,7 @@ export default function LanguageSwitcher() {
 
   // Change language using context
   const changeLanguage = (language: Language) => {
-    setLanguage(language.code as "en" | "tmz" | "fr");
+    setLanguage(language.code as "en" | "tmz");
   };
 
   return (

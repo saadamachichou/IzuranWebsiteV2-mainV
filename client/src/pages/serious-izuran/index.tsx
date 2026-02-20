@@ -183,14 +183,14 @@ export default function SeriousIzuran() {
                   placeholder="Search podcasts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-black/60 border-amber-500/30 text-amber-200 placeholder:text-amber-400/50 focus:border-amber-500"
+                  className="font-montserrat pl-10 bg-black/60 border-amber-500/30 text-amber-200 placeholder:text-amber-400/50 focus:border-amber-500"
                 />
               </div>
             </motion.div>
 
             {/* Podcasts List - matching homepage style */}
             {filteredPodcasts.length === 0 ? (
-              <div className="text-center py-16">
+              <div className="font-montserrat text-center py-16">
                 <p className="text-yellow-200/70 text-lg">
                   {searchQuery ? "No podcasts found matching your search." : "No podcasts available at the moment."}
                 </p>

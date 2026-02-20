@@ -146,15 +146,12 @@ export default function Header() {
                 <Globe className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLanguage('en')}>
-                <span className={language === 'en' ? 'font-medium' : ''}>English</span>
+            <DropdownMenuContent align="end" className="bg-black border-amber-500/30 text-amber-100 shadow-lg">
+              <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 focus:text-amber-50">
+                <span className={language === 'en' ? 'font-medium text-amber-400' : ''}>English</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage('tmz')}>
-                <span className={language === 'tmz' ? 'font-medium' : ''}>ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight)</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage('fr')}>
-                <span className={language === 'fr' ? 'font-medium' : ''}>Français</span>
+              <DropdownMenuItem onClick={() => setLanguage('tmz')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 focus:text-amber-50">
+                <span className={language === 'tmz' ? 'font-medium text-amber-400' : ''}>ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight)</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -285,18 +282,15 @@ export default function Header() {
                     <DropdownMenuTrigger asChild aria-label={t('Select language')}>
                       <Button variant="ghost" size="sm" className="flex items-center gap-2" aria-label={t('Select language')}>
                         <Globe className="h-4 w-4" />
-                        {language === 'en' ? 'English' : language === 'tmz' ? 'Tamazight' : 'Français'}
+                        {language === 'en' ? 'English' : 'Tamazight'}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setLanguage('en')}>
-                        <span className={language === 'en' ? 'font-medium' : ''}>English</span>
+                    <DropdownMenuContent align="end" className="bg-black border-amber-500/30 text-amber-100 shadow-lg">
+                      <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 focus:text-amber-50">
+                        <span className={language === 'en' ? 'font-medium text-amber-400' : ''}>English</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setLanguage('tmz')}>
-                        <span className={language === 'tmz' ? 'font-medium' : ''}>ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight)</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setLanguage('fr')}>
-                        <span className={language === 'fr' ? 'font-medium' : ''}>Français</span>
+                      <DropdownMenuItem onClick={() => setLanguage('tmz')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 focus:text-amber-50">
+                        <span className={language === 'tmz' ? 'font-medium text-amber-400' : ''}>ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight)</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

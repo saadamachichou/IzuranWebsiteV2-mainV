@@ -80,11 +80,10 @@ export default function ShoppingCart() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-black shadow-xl border-l border-amber-700 z-[99999]"
+              className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-black shadow-xl border-l border-amber-700 z-[99999] flex flex-col h-screen"
             >
-              <div className="flex h-full flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-amber-700 bg-black">
+              {/* Header */}
+              <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-amber-700 bg-black">
                   <h2 className="text-lg font-semibold text-amber-400">{t('Your Cart')} ({cartCount})</h2>
                   <Button
                     variant="ghost"
@@ -98,21 +97,14 @@ export default function ShoppingCart() {
                 </div>
 
                 {/* Cart Content */}
-                <div className="flex-1 overflow-y-auto bg-black">
+                <div className="flex-1 overflow-y-auto bg-black min-h-0">
                   {cart.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-                      <CartIcon className="h-16 w-16 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">{t('Your cart is empty')}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-xs">
+                    <div className="flex flex-col items-center justify-center flex-1 p-6 text-center">
+                      <CartIcon className="h-16 w-16 text-amber-500/50 mb-4" />
+                      <h3 className="text-lg font-semibold mb-2 text-amber-100">{t('Your cart is empty')}</h3>
+                      <p className="font-montserrat text-sm text-amber-200/80 mb-6 max-w-xs">
                         {t('Looks like you haven\'t added any products to your cart yet.')}
                       </p>
-                      <Button 
-                        className="bg-amber-500 hover:bg-amber-600 text-black font-medium" 
-                        onClick={() => setIsCartOpen(false)}
-                        asChild
-                      >
-                        <Link href="/shop">{t('Browse Products')}</Link>
-                      </Button>
                     </div>
                   ) : (
                     <div className="p-4 space-y-3">
@@ -210,19 +202,28 @@ export default function ShoppingCart() {
                   )}
                 </div>
 
-                {/* Cart Footer */}
-                {cart.length > 0 && (
-                  <div className="border-t border-white p-4 bg-[#000000]">
+                {/* Cart Footer - always visible at bottom */}
+                <div className="flex-shrink-0 border-t border-amber-700 p-4 bg-black">
+                  {cart.length === 0 ? (
+                    <Button 
+                      className="font-montserrat w-full bg-amber-500 hover:bg-amber-600 text-black font-medium py-3" 
+                      onClick={() => setIsCartOpen(false)}
+                      asChild
+                    >
+                      <Link href="/shop">{t('Browse Products')}</Link>
+                    </Button>
+                  ) : (
+                  <>
                     {/* Order Summary */}
                     <div className="space-y-3 mb-4">
-                      <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+                      <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wide">
                         {t('Order Summary')}
                       </h3>
                       
                       {/* Product List */}
                       <div className="space-y-2 max-h-32 overflow-y-auto">
                         {cart.map((item) => (
-                          <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-800/30 rounded-md border border-white">
+                          <div key={item.id} className="flex items-center gap-2 p-2 bg-amber-900/20 rounded-md border border-amber-700/50">
                             <div className="w-8 h-8 flex-shrink-0 overflow-hidden rounded border bg-gray-100 dark:bg-gray-700">
                               <img
                                 src={item.imageUrl || '/placeholder.svg'}
@@ -234,14 +235,14 @@ export default function ShoppingCart() {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-white truncate">
+                              <p className="text-xs font-medium text-amber-100 truncate">
                                 {item.name}
                               </p>
-                              <p className="text-xs text-white">
+                              <p className="text-xs text-amber-200/90">
                                 {item.quantity}x {cartCurrency} {parseFloat(item.price.toString()).toFixed(2)}
                               </p>
                             </div>
-                            <span className="text-xs font-semibold text-white">
+                            <span className="text-xs font-semibold text-amber-200">
                               {cartCurrency} {(parseFloat(item.price.toString()) * item.quantity).toFixed(2)}
                             </span>
                           </div>
@@ -250,33 +251,33 @@ export default function ShoppingCart() {
                       
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-white">
+                          <span className="text-amber-200">
                             {t('Subtotal')} ({cartCount} {cartCount === 1 ? 'item' : 'items'})
                           </span>
-                          <span className="font-medium text-white">
+                          <span className="font-medium text-amber-100">
                             {cartCurrency} {cartTotal.toFixed(2)}
                           </span>
                         </div>
                         
                         <div className="flex justify-between text-sm">
-                          <span className="text-white">{t('Shipping')}</span>
-                          <span className="font-medium text-white">{t('Free')}</span>
+                          <span className="text-amber-200">{t('Shipping')}</span>
+                          <span className="font-medium text-amber-100">{t('Free')}</span>
                         </div>
                         
                         <div className="flex justify-between text-sm">
-                          <span className="text-white">{t('Tax')}</span>
-                          <span className="font-medium text-white">{t('Included')}</span>
+                          <span className="text-amber-200">{t('Tax')}</span>
+                          <span className="font-medium text-amber-100">{t('Included')}</span>
                         </div>
                       </div>
                       
-                      <div className="border-t border-white pt-3">
+                      <div className="border-t border-amber-700 pt-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-lg font-bold text-white">{t('Total')}</span>
+                          <span className="text-lg font-bold text-amber-400">{t('Total')}</span>
                           <div className="text-right">
-                            <span className="text-xl font-bold text-white">
+                            <span className="text-xl font-bold text-amber-100">
                               {cartCurrency} {cartTotal.toFixed(2)}
                             </span>
-                            <p className="text-xs text-white">
+                            <p className="text-xs text-amber-200/80">
                               {cartCount} {cartCount === 1 ? 'item' : 'items'}
                             </p>
                           </div>
@@ -319,12 +320,12 @@ export default function ShoppingCart() {
                       </div>
                     </div>
                     
-                    <p className="text-xs text-white text-center mt-3">
+                    <p className="text-xs text-amber-200/80 text-center mt-3">
                       {t('Shipping and taxes calculated at checkout.')}
                     </p>
-                  </div>
-                )}
-              </div>
+                  </>
+                  )}
+                </div>
             </motion.div>
           </>
         )}

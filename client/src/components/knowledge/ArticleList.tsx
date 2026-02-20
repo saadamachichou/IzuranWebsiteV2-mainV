@@ -39,7 +39,7 @@ export default function ArticleList({ limit = 0 }: { limit?: number }) {
           {categories.map((cat) => (
             <button 
               key={cat.id}
-              className={`px-4 py-2 rounded whitespace-nowrap transition-all ${
+              className={`font-montserrat px-4 py-2 rounded whitespace-nowrap transition-all ${
                 category === cat.id 
                   ? "bg-izuran-purple text-white" 
                   : "bg-transparent border border-izuran-blue text-white hover:bg-izuran-purple hover:bg-opacity-30"
@@ -99,7 +99,7 @@ export default function ArticleList({ limit = 0 }: { limit?: number }) {
         {categories.map((cat) => (
           <button 
             key={cat.id}
-            className={`px-4 py-2 rounded whitespace-nowrap transition-all ${
+            className={`font-montserrat px-4 py-2 rounded whitespace-nowrap transition-all ${
               category === cat.id 
                 ? "bg-amber-500 text-black" 
                 : "bg-transparent border border-amber-500 text-amber-400 hover:bg-amber-500/20"

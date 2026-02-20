@@ -109,7 +109,7 @@ export default function EventCard({ event }: EventCardProps) {
           loading="lazy"
           onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
         />
-        <div className={`absolute top-3 right-3 px-3 py-1 rounded text-sm font-medium ${
+        <div className={`font-montserrat absolute top-3 right-3 px-3 py-1 rounded text-sm font-medium ${
           event.status === 'completed' 
             ? 'bg-gray-600 text-gray-200' 
             : 'bg-amber-600 text-black'

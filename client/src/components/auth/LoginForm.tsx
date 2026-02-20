@@ -70,7 +70,7 @@ export default function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <div className="space-y-6 p-6 max-w-md mx-auto bg-black/40 backdrop-blur-md rounded-xl border border-amber-500/20">
-      <div>
+      <div className="font-montserrat">
         <h2 className="text-2xl font-bold text-center text-amber-300">{t("login.title")}</h2>
         <p className="text-amber-200/70 text-center mt-2">
           {t("login.subtitle")}
@@ -101,7 +101,7 @@ export default function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
                   <Input
                     placeholder="example@izuran.com"
                     {...field}
-                    className="bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"
+                    className="font-montserrat bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"
                   />
                 </FormControl>
                 <FormMessage className="text-red-400" />
@@ -119,7 +119,7 @@ export default function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
                     type="password"
                     placeholder="••••••••"
                     {...field}
-                    className="bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"
+                    className="font-montserrat bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"
                   />
                 </FormControl>
                 <FormMessage className="text-red-400" />

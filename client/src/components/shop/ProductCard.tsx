@@ -92,7 +92,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
               </motion.div>
             )}
             
-            <Badge className="bg-black/80 backdrop-blur-sm text-amber-200 hover:bg-black/90 border border-amber-500/30 font-medium">
+            <Badge className="font-montserrat bg-black/80 backdrop-blur-sm text-amber-200 hover:bg-black/90 border border-amber-500/30 font-medium">
               {product.productType === 'physical' ? 'Physical' : 'Digital'}
             </Badge>
           </div>
@@ -127,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           </div>
 
           {/* Price and Stock */}
-          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-500/10 to-transparent rounded-lg border border-amber-500/20">
+          <div className="font-montserrat flex items-center justify-between p-3 bg-gradient-to-r from-amber-500/10 to-transparent rounded-lg border border-amber-500/20">
             <div className="space-y-1">
               <div className="flex items-baseline gap-1">
                 <span className="font-bold text-2xl text-amber-400">
@@ -164,7 +164,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
                 variant={isOutOfStock ? "outline" : "default"}
                 onClick={() => !isOutOfStock && onAddToCart && onAddToCart(product)}
                 disabled={isOutOfStock || !onAddToCart}
-                className={`w-full h-10 rounded-lg font-medium text-sm transition-all duration-300 ${
+                className={`font-montserrat w-full h-10 rounded-lg font-medium text-sm transition-all duration-300 ${
                   !isOutOfStock 
                     ? "bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-400 hover:via-amber-500 hover:to-amber-400 text-black shadow-lg hover:shadow-xl hover:shadow-amber-500/25" 
                     : "border-amber-500/50 text-amber-400 hover:bg-amber-500/10"

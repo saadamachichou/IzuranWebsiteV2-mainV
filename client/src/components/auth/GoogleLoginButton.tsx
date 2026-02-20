@@ -69,7 +69,7 @@ export default function GoogleLoginButton({
       <Button
         type="button"
         variant={variant}
-        className={`${className} flex items-center justify-center gap-2 bg-black/60 border-amber-500/20 text-amber-200 hover:bg-amber-500/10 hover:border-amber-500/40 transition-colors`}
+        className={`font-montserrat ${className} flex items-center justify-center gap-2 bg-black/60 border-amber-500/20 text-amber-200 hover:bg-amber-500/10 hover:border-amber-500/40 transition-colors`}
         onClick={handleGoogleLogin}
         disabled={isLoading}
       >
