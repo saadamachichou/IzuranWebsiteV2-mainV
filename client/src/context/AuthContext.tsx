@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in + process Google redirect (mobile) on load
+  // On load: process Google redirect first (mobile return), then check auth status
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -95,7 +95,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    checkAuthStatus();
+    const init = async () => {
+      try {
+        setIsLoading(true);
+        // 1. Process Google redirect FIRST - when returning from mobile sign-in, we must handle this before anything else
+        await handleGoogleRedirect();
+        // 2. Then check auth status (or verify session from redirect)
+        await checkAuthStatus();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    init();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -321,12 +332,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       setError(null);
       
-      console.log("Checking for Google sign-in redirect result...");
+      // Detect if we're returning from Google redirect (Firebase adds __/auth to hash)
+      const isReturningFromRedirect = typeof window !== "undefined" && 
+        (window.location.hash.includes("__/auth") || window.location.hash.includes("authType=signInWithRedirect"));
       
-      // Get user from Firebase redirect - with timeout (getRedirectResult can hang on some mobile browsers)
-      const REDIRECT_TIMEOUT_MS = 8000;
+      // Give Firebase a moment to initialize before reading redirect result
+      await new Promise((r) => setTimeout(r, 300));
+      
+      console.log("Checking for Google sign-in redirect result...", { isReturningFromRedirect });
+      
+      // Use longer timeout when returning from redirect - getRedirectResult can be slow on mobile
+      const REDIRECT_TIMEOUT_MS = isReturningFromRedirect ? 25000 : 8000;
       const firebaseUser = await Promise.race([
-        getGoogleRedirectResult().catch(() => null),
+        getGoogleRedirectResult().catch((err) => {
+          console.warn("getGoogleRedirectResult error:", err);
+          return null;
+        }),
         new Promise<null>((resolve) =>
           setTimeout(() => {
             console.warn("Google redirect check timed out - continuing");
@@ -473,11 +494,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   };
-
-  // Check for Google redirect on initial load
-  useEffect(() => {
-    handleGoogleRedirect();
-  }, []);
 
   return (
     <AuthContext.Provider
