@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in
+  // Check if user is already logged in + process Google redirect (mobile) on load
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -323,8 +323,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       console.log("Checking for Google sign-in redirect result...");
       
-      // Get user from Firebase redirect
-      const firebaseUser = await getGoogleRedirectResult();
+      // Get user from Firebase redirect - with timeout (getRedirectResult can hang on some mobile browsers)
+      const REDIRECT_TIMEOUT_MS = 8000;
+      const firebaseUser = await Promise.race([
+        getGoogleRedirectResult().catch(() => null),
+        new Promise<null>((resolve) =>
+          setTimeout(() => {
+            console.warn("Google redirect check timed out - continuing");
+            resolve(null);
+          }, REDIRECT_TIMEOUT_MS)
+        ),
+      ]);
       if (!firebaseUser) {
         console.log("No redirect result found, user may not have attempted Google sign-in");
         return; // Not an error, normal state for most page loads
