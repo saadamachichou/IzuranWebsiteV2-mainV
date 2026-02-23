@@ -63,6 +63,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <h2 className="text-3xl font-bold mb-12 text-center">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Latest Podcasts</span>
+                <p className="text-gray-400 text-lg mt-2 font-normal">New Mixes On The Way</p>
               </h2>
               
               <Suspense fallback={<SectionLoader />}>
@@ -79,6 +80,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <h2 className="text-3xl font-bold mb-12 text-center">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-400 tracking-wider drop-shadow-lg" style={{letterSpacing: '0.08em'}}>Upcoming Events</span>
+                <p className="text-gray-400 text-lg mt-2 font-normal">Stay Tuned for Live Dates</p>
               </h2>
               
               <Suspense fallback={<SectionLoader />}>
