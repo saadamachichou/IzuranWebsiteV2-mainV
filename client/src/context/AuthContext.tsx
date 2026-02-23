@@ -216,15 +216,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
   };
 
-  // Google login with popup
+  // Google login - uses redirect on mobile (popups fail on phones), popup on desktop
   const loginWithGoogle = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      console.log("Starting Google authentication process...");
+      // On mobile: use redirect flow - popups often fail ("closed before operation completed")
+      const useRedirect = typeof window !== "undefined" && window.innerWidth < 768;
+      if (useRedirect) {
+        console.log("Starting Google sign-in with redirect (mobile)...");
+        await signInWithGoogleRedirect();
+        // Page will redirect to Google, then back - handleGoogleRedirect will complete auth
+        return;
+      }
       
-      // Get user and access token from Firebase
+      console.log("Starting Google authentication process (popup)...");
+      
+      // Get user and access token from Firebase (desktop popup flow)
       const { user: firebaseUser, accessToken } = await signInWithGoogle();
       console.log("[DEBUG] Firebase user object:", firebaseUser);
       console.log("[DEBUG] Google photoURL:", firebaseUser.photoURL);
