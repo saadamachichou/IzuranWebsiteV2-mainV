@@ -93,9 +93,9 @@ export async function fetchWithTokenRefresh(
   
   // If unauthorized and not already a refresh token request
   if (response.status === 401 && !url.includes('/api/auth/refresh-token')) {
-    // Only attempt refresh if we might have a valid session
-    if (mightHaveValidSession()) {
-      // Try to refresh the token
+    // Only attempt refresh if we have a confirmed prior session - avoids a
+    // redundant refresh-token 401 on first/unauthenticated page loads
+    if (localStorage.getItem('hasAuthSession') === 'true') {
       const newToken = await refreshAccessToken();
       
       if (newToken) {
@@ -106,8 +106,7 @@ export async function fetchWithTokenRefresh(
         localStorage.removeItem('hasAuthSession');
       }
     }
-    // If refresh failed or no session, return the response without retrying
-    // This is expected when user is not authenticated
+    // No known session - return the 401 response without retrying
   }
   
   return response;

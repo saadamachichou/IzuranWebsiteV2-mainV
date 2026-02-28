@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       <main className={cn(
         "min-h-screen transition-all duration-300 ease-in-out",
-        isMobile ? "pl-0" : "pl-64"
+        isMobile ? "pl-0 pt-14" : "pl-64"
       )}>
         {children}
       </main>

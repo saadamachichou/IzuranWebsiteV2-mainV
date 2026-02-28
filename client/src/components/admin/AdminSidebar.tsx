@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, Link } from "wouter";
 import { 
   LayoutDashboard, 
@@ -14,7 +14,8 @@ import {
   LogOut,
   Image,
   MessageSquare,
-  Radio
+  Radio,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,11 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(!isMobile);
   const { user, logout } = useAuth();
 
-  // Automatically close sidebar on mobile when navigating
+  const currentPageTitle = useMemo(() => {
+    const match = navItems.find((item) => location.startsWith(item.href));
+    return match?.title ?? "Admin";
+  }, [location]);
+
   useEffect(() => {
     if (isMobile) {
       setIsOpen(false);
@@ -103,22 +108,40 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
+      {/* Mobile top bar — replaces the old floating button */}
       {isMobile && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-4 left-4 z-50 lg:hidden bg-background/50 backdrop-blur-sm"
-        >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-amber-500/20 bg-black/90 px-4 backdrop-blur-xl">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-amber-300 hover:bg-amber-500/10"
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+
+          <span className="text-sm font-semibold tracking-wide text-amber-300">
+            {currentPageTitle}
+          </span>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className="text-amber-300 hover:bg-amber-500/10"
+          >
+            <Link href="/">
+              <Home className="h-5 w-5" />
+            </Link>
+          </Button>
+        </div>
       )}
 
       {/* Sidebar */}
       <div 
         className={cn(
           "fixed left-0 top-0 z-40 h-full w-64 bg-black/90 border-r border-amber-500/20 backdrop-blur-xl transition-transform duration-300 ease-in-out",
+          isMobile ? "top-14" : "top-0",
           isMobile && !isOpen ? "-translate-x-full" : "translate-x-0",
         )}
       >
@@ -143,7 +166,7 @@ export default function AdminSidebar() {
             )}
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
             {navItems.map((item) => {
               const isActive = location.startsWith(item.href);
               return (
@@ -184,7 +207,7 @@ export default function AdminSidebar() {
       {/* Backdrop for mobile */}
       {isMobile && isOpen && (
         <div 
-          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-x-0 bottom-0 top-14 z-30 bg-background/80 backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setIsOpen(false)}
         />
       )}

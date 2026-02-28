@@ -45,11 +45,38 @@ app.use((req, res, next) => {
   // This must be set for all responses, not just HTML
   res.setHeader('Permissions-Policy', 'encrypted-media=*, microphone=*, camera=*, geolocation=*');
   
-  // Temporarily disable CSP for development to allow SoundCloud embeds
-  // res.setHeader(
-  //   'Content-Security-Policy',
-  //   "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://w.soundcloud.com https://soundcloud.com https://*.soundcloud.com; style-src 'self' 'unsafe-inline' https://w.soundcloud.com https://*.soundcloud.com; frame-src 'self' https://w.soundcloud.com https://soundcloud.com https://*.soundcloud.com; img-src 'self' data: https: https://*.soundcloud.com; media-src 'self' https: https://*.soundcloud.com; connect-src 'self' https: https://*.soundcloud.com; font-src 'self' data: https:;"
-  // );
+  // Content Security Policy — permissive enough for all features:
+  //   unsafe-eval   : Firebase SDK, Vite HMR, framer-motion, and dynamic libraries use eval
+  //   unsafe-inline : inline scripts/styles used by Vite dev, React, and many UI libs
+  //   firebaseapp   : Firebase auth iframe + redirect handler
+  //   googleapis    : Google Fonts, Firebase, Google account chooser
+  //   soundcloud    : SoundCloud embeds and player
+  //   data: / blob: : local object URLs (audio, images)
+  const isDev = process.env.NODE_ENV !== 'production';
+  const csp = [
+    "default-src 'self'",
+    // Scripts: allow eval for Firebase/Vite, inline for React/UI, and all needed origins
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseapp.com https://*.googleapis.com https://apis.google.com https://w.soundcloud.com https://soundcloud.com https://*.soundcloud.com${isDev ? " http://localhost:* ws://localhost:*" : ""}`,
+    // Styles: allow inline (used by Framer Motion, Radix, etc.) and Google Fonts
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.soundcloud.com",
+    // Fonts: self + Google Fonts CDN + data URIs
+    "font-src 'self' data: https://fonts.gstatic.com",
+    // Frames: Firebase auth handler + SoundCloud player
+    "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://w.soundcloud.com https://soundcloud.com https://bandcamp.com https://*.bandcamp.com",
+    // Images: anything HTTPS + data URIs (Google profile pics, SoundCloud, etc.)
+    "img-src 'self' data: blob: https:",
+    // Media: audio/video from SoundCloud and self
+    "media-src 'self' blob: https:",
+    // Connections: Firebase, Google APIs, SoundCloud, Stripe, local dev
+    `connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.soundcloud.com https://api.stripe.com${isDev ? " ws://localhost:* http://localhost:*" : ""}`,
+    // Workers: blob URIs for service workers
+    "worker-src 'self' blob:",
+    // Object/manifest
+    "object-src 'none'",
+    "manifest-src 'self'",
+  ].join('; ');
+
+  res.setHeader('Content-Security-Policy', csp);
   
   next();
 });
@@ -155,25 +182,10 @@ app.use((req, res, next) => {
     }
   });
 
-  // Set Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers, except for Firebase Auth, API auth routes, static assets, and the root route
-  if (
-    req.path.startsWith('/__/auth/') ||
-    req.path.startsWith('/api/auth/') ||
-    req.path.startsWith('/api/admin/') ||
-    req.path.startsWith('/api/') ||
-    req.path.startsWith('/assets/') ||
-    req.path.startsWith('/uploads/') ||
-    req.path.startsWith('/images/') ||
-    req.path.startsWith('/fonts/') ||
-    req.path === '/'
-  ) {
-    return next();
-  }
-  
-  // Set security headers but allow SoundCloud media functionality
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless'); // Less restrictive than 'require-corp'
-
+  // COEP (Cross-Origin-Embedder-Policy) is intentionally NOT set.
+  // Setting it (even to "credentialless") blocks the Firebase auth iframe
+  // (izuran-4731d.firebaseapp.com/__/auth/iframe) that is loaded on every page
+  // via AuthProvider, breaking Google sign-in session persistence.
   next();
 });
 

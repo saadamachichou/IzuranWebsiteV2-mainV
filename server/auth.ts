@@ -259,7 +259,30 @@ export function getCurrentUser(req: Request, res: Response) {
   if (req.isAuthenticated() && req.user) {
     return res.json({ user: req.user });
   }
-  return res.status(401).json({ message: "Not authenticated" });
+
+  // Fallback to JWT cookie/auth header for stateless clients.
+  const token = req.cookies?.accessToken || extractToken(req);
+  if (!token) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  const payload = verifyToken(token);
+  if (!payload) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  db.query.users.findFirst({
+    where: eq(schema.users.id, payload.userId)
+  }).then((user) => {
+    if (!user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const { passwordHash, ...safeUser } = user;
+    return res.json({ user: safeUser });
+  }).catch((err) => {
+    console.error("Error loading current user:", err);
+    return res.status(500).json({ message: "Failed to load user" });
+  });
 }
 
 /**
@@ -494,11 +517,23 @@ export async function authenticateWithGoogle(req: Request, res: Response) {
       // Generate JWT tokens
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
-      
-      // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity)
-      res.cookie('refreshToken', refreshToken, {
+
+      const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' as 'none' | 'lax',
+        path: '/'
+      };
+
+      // Set short-lived access token cookie for authenticated API calls.
+      res.cookie('accessToken', accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000 // 15 minutes
+      });
+
+      // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity).
+      res.cookie('refreshToken', refreshToken, {
+        ...cookieOptions,
         maxAge: 8 * 60 * 60 * 1000 // 8 hours
       });
       

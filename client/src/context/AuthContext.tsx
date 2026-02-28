@@ -1,9 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User } from "@shared/schema";
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { 
+  auth as firebaseAuth,
   signInWithGoogle, 
   signInWithGoogleRedirect, 
   getGoogleRedirectResult,
+  isRealMobileDevice,
   signOut as firebaseSignOut
 } from "@/lib/firebase";
 import { fetchWithTokenRefresh, mightHaveValidSession } from "@/lib/tokenUtils";
@@ -13,7 +16,7 @@ type AuthContextType = {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<{ redirecting: boolean }>;
   handleGoogleRedirect: () => Promise<void>;
   register: (username: string, email: string, password: string, confirmPassword: string, firstName?: string, lastName?: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -23,6 +26,34 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+async function waitForFirebaseUserAfterRedirect(timeoutMs = 8000): Promise<FirebaseUser | null> {
+  if (!firebaseAuth) return null;
+
+  // Fast path: user is already available.
+  if (firebaseAuth.currentUser) return firebaseAuth.currentUser;
+
+  return new Promise((resolve) => {
+    let settled = false;
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+      if (settled) return;
+      if (user) {
+        settled = true;
+        clearTimeout(timer);
+        unsubscribe();
+        resolve(user);
+      }
+    });
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      unsubscribe();
+      resolve(firebaseAuth.currentUser ?? null);
+    }, timeoutMs);
+  });
+}
 
 async function fetchAndUploadGoogleProfileImage(photoURL: string): Promise<string | null> {
   try {
@@ -59,15 +90,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // On load: process Google redirect first (mobile return), then check auth status
   useEffect(() => {
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = async (forceCheck = false) => {
       try {
         setIsLoading(true);
         
-        // Use localStorage so "remember me" survives reloads and new tabs
-        const isInitialLoad = !localStorage.getItem('authChecked');
-        
-        // Skip auth check only if we've already checked and there's no auth flag
-        if (!mightHaveValidSession() && !isInitialLoad) {
+        // Skip auth check only if we've already confirmed there's no session
+        if (!forceCheck && !mightHaveValidSession()) {
           setUser(null);
           setIsLoading(false);
           return;
@@ -98,10 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const init = async () => {
       try {
         setIsLoading(true);
+        const redirectPending = sessionStorage.getItem('googleRedirectPending') === 'true';
         // 1. Process Google redirect FIRST - when returning from mobile sign-in, we must handle this before anything else
         await handleGoogleRedirect();
         // 2. Then check auth status (or verify session from redirect)
-        await checkAuthStatus();
+        // Force a check after redirect attempts so mobile return never gets skipped.
+        await checkAuthStatus(redirectPending);
       } finally {
         setIsLoading(false);
       }
@@ -227,50 +257,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
   };
 
-  // Google login - uses redirect on mobile (popups fail on phones), popup on desktop
-  const loginWithGoogle = async () => {
+  // Google login — always try popup first (works on both desktop and mobile).
+  // signInWithPopup opens a new tab on mobile browsers which avoids the
+  // cross-origin redirect-state-recovery problem that breaks signInWithRedirect
+  // when authDomain differs from the app origin.
+  // Falls back to redirect only if the popup is explicitly blocked.
+  const loginWithGoogle = async (): Promise<{ redirecting: boolean }> => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // On mobile: use redirect flow - popups often fail ("closed before operation completed")
-      const useRedirect = typeof window !== "undefined" && window.innerWidth < 768;
-      if (useRedirect) {
-        console.log("Starting Google sign-in with redirect (mobile)...");
-        await signInWithGoogleRedirect();
-        // Page will redirect to Google, then back - handleGoogleRedirect will complete auth
-        return;
+
+      console.log("[AUTH:LOGIN_GOOGLE]", {
+        isMobile: isRealMobileDevice(),
+        screenWidth: window.innerWidth,
+        userAgent: navigator.userAgent,
+      });
+
+      let firebaseUser: import("firebase/auth").User;
+      let accessToken: string | undefined;
+
+      try {
+        const result = await signInWithGoogle();
+        firebaseUser = result.user;
+        accessToken = result.accessToken;
+      } catch (popupErr: any) {
+        if (popupErr?.code === 'auth/popup-closed-by-user' || popupErr?.code === 'auth/cancelled-popup-request') {
+          return { redirecting: false };
+        }
+
+        // Popup was blocked — fall back to redirect as last resort
+        if (popupErr?.code === 'auth/popup-blocked') {
+          console.warn("[AUTH:LOGIN_GOOGLE] Popup blocked, falling back to redirect");
+          await signInWithGoogleRedirect();
+          return { redirecting: true };
+        }
+
+        throw popupErr;
       }
-      
-      console.log("Starting Google authentication process (popup)...");
-      
-      // Get user and access token from Firebase (desktop popup flow)
-      const { user: firebaseUser, accessToken } = await signInWithGoogle();
-      console.log("[DEBUG] Firebase user object:", firebaseUser);
-      console.log("[DEBUG] Google photoURL:", firebaseUser.photoURL);
-      console.log("[DEBUG] Google OAuth accessToken:", accessToken);
+
       if (!firebaseUser) {
-        console.error("Firebase returned no user after Google sign-in");
         throw new Error('Google authentication failed - No user data received');
       }
-      
-      // Step 1: Authenticate with backend using Google profile URL (even if it's a Google URL)
+
+      // Authenticate with backend
       const userData = {
         providerId: firebaseUser.uid,
         email: firebaseUser.email,
         username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'user',
         firstName: firebaseUser.displayName?.split(' ')[0],
         lastName: firebaseUser.displayName?.split(' ').slice(1).join(' '),
-        profilePictureUrl: firebaseUser.photoURL?.replace('=s96-c', '=s400-c'), // Google URL
+        profilePictureUrl: firebaseUser.photoURL?.replace('=s96-c', '=s400-c'),
         authProvider: 'google',
         accessToken,
       };
-      console.log("[DEBUG] Payload sent to backend:", userData);
+      console.log("[AUTH:LOGIN_GOOGLE] Sending to backend...");
       const response = await fetch('/api/auth/google', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
         credentials: 'include'
       });
@@ -285,38 +328,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         throw new Error(errorMsg);
       }
-      let backendUser;
-      try {
-        const data = await response.json();
-        console.log("[DEBUG] Backend response:", data);
-        setUser(data.user);
-        backendUser = data.user;
-      } catch (jsonError) {
-        console.error("Error parsing successful response:", jsonError);
-        throw new Error('Failed to process authentication response');
-      }
-      // Step 2: Now upload the Google image to your server (if photoURL exists)
+
+      const data = await response.json();
+      console.log("[AUTH:LOGIN_GOOGLE] Backend success");
+      setUser(data.user);
+      localStorage.setItem('hasAuthSession', 'true');
+
+      // Upload Google profile image to local server in background
       if (firebaseUser.photoURL) {
         const localProfilePictureUrl = await fetchAndUploadGoogleProfileImage(firebaseUser.photoURL.replace('=s96-c', '=s400-c'));
         if (localProfilePictureUrl) {
-          // PATCH the user profile to update the profilePictureUrl to the local one
           await fetch('/api/auth/profile-picture-url', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ profilePictureUrl: localProfilePictureUrl }),
             credentials: 'include'
           });
-          // Reload user from backend to get the latest profilePictureUrl
           const refreshed = await fetchWithTokenRefresh('/api/auth/me');
           if (refreshed.ok) {
             const refreshedData = await refreshed.json();
             setUser(refreshedData.user);
           } else {
-            // fallback: update the user in context
             setUser((prev) => prev ? { ...prev, profilePictureUrl: localProfilePictureUrl } : prev);
           }
         }
       }
+      return { redirecting: false };
     } catch (err: any) {
       console.error('Google login error:', err);
       setError(err.message || 'Google authentication failed');
@@ -326,43 +363,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Handle redirect result from Google login (mobile friendly)
+  // Called on every page load — handles the return from Google redirect (mobile flow)
   const handleGoogleRedirect = async () => {
+    // Only bother checking if we're on a mobile device
+    if (!isRealMobileDevice()) return;
+
+    const redirectPending = sessionStorage.getItem('googleRedirectPending') === 'true';
+    const redirectTs = parseInt(sessionStorage.getItem('googleRedirectTimestamp') || '0');
+    const redirectAgeMs = Date.now() - redirectTs;
+    // Honour flag only if set within the last 5 minutes
+    const isReturningFromRedirect = redirectPending && redirectAgeMs < 5 * 60 * 1000;
+
+    console.log("[AUTH:HANDLE_REDIRECT]", { isReturningFromRedirect, redirectAgeMs });
+
+    // On a normal page load with no pending redirect, resolve quickly
+    const TIMEOUT_MS = isReturningFromRedirect ? 20000 : 4000;
+
     try {
       setIsLoading(true);
-      setError(null);
-      
-      // Detect if we're returning from Google redirect (Firebase adds __/auth to hash)
-      const isReturningFromRedirect = typeof window !== "undefined" && 
-        (window.location.hash.includes("__/auth") || window.location.hash.includes("authType=signInWithRedirect"));
-      
-      // Give Firebase a moment to initialize before reading redirect result
-      await new Promise((r) => setTimeout(r, 300));
-      
-      console.log("Checking for Google sign-in redirect result...", { isReturningFromRedirect });
-      
-      // Use longer timeout when returning from redirect - getRedirectResult can be slow on mobile
-      const REDIRECT_TIMEOUT_MS = isReturningFromRedirect ? 25000 : 8000;
-      const firebaseUser = await Promise.race([
+
+      let firebaseUser = await Promise.race([
         getGoogleRedirectResult().catch((err) => {
-          console.warn("getGoogleRedirectResult error:", err);
+          console.error("[AUTH:HANDLE_REDIRECT] getGoogleRedirectResult threw:", err?.message);
           return null;
         }),
         new Promise<null>((resolve) =>
           setTimeout(() => {
-            console.warn("Google redirect check timed out - continuing");
+            if (isReturningFromRedirect) {
+              console.warn(`[AUTH:HANDLE_REDIRECT] Timed out after ${TIMEOUT_MS}ms`);
+            }
             resolve(null);
-          }, REDIRECT_TIMEOUT_MS)
+          }, TIMEOUT_MS)
         ),
       ]);
-      if (!firebaseUser) {
-        console.log("No redirect result found, user may not have attempted Google sign-in");
-        return; // Not an error, normal state for most page loads
+
+      // Some mobile browsers complete redirect auth but return null from getRedirectResult().
+      // Fallback to the currently authenticated Firebase user before giving up.
+      if (!firebaseUser && isReturningFromRedirect) {
+        firebaseUser = await waitForFirebaseUserAfterRedirect(8000);
+        if (firebaseUser) {
+          console.log("[AUTH:HANDLE_REDIRECT] Fallback recovered Firebase user via auth state");
+        } else {
+          console.warn("[AUTH:HANDLE_REDIRECT] No Firebase user from redirect result or auth-state fallback");
+        }
       }
-      
-      console.log("Firebase redirect result received, authenticating with backend");
-      
-      // Prepare user data from Firebase
+
+      sessionStorage.removeItem('googleRedirectPending');
+      sessionStorage.removeItem('googleRedirectTimestamp');
+
+      if (!firebaseUser) return;
+
+      console.log("[AUTH:HANDLE_REDIRECT] User received, authenticating with backend...");
+
       const userData = {
         providerId: firebaseUser.uid,
         email: firebaseUser.email,
@@ -372,51 +424,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profilePictureUrl: firebaseUser.photoURL?.replace('=s96-c', '=s400-c'),
         authProvider: 'google',
       };
-      
-      console.log("Sending user data to backend:", {
-        providerId: userData.providerId?.substring(0, 5) + '...',
-        email: userData.email?.substring(0, 3) + '...',
-        username: userData.username
-      });
-      
-      // Authenticate with our backend
+
       const response = await fetch('/api/auth/google', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
-        credentials: 'include'
+        credentials: 'include',
       });
-      
-      // Handle non-OK responses
+
+      console.log("[AUTH:HANDLE_REDIRECT] Backend response:", response.status);
+
       if (!response.ok) {
-        let errorMsg = 'Google authentication failed on the server';
-        
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.message || errorData.error || errorMsg;
-          console.error("Backend auth error:", errorData);
-        } catch (jsonError) {
-          console.error("Failed to parse error response:", jsonError);
-        }
-        
-        throw new Error(errorMsg);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Google authentication failed on the server');
       }
-      
-      // Handle successful response
-      try {
-        const data = await response.json();
-        console.log("Backend authentication successful, user logged in");
-        setUser(data.user);
-      } catch (jsonError) {
-        console.error("Error parsing successful response:", jsonError);
-        throw new Error('Failed to process authentication response');
-      }
+
+      const data = await response.json();
+      console.log("[AUTH:HANDLE_REDIRECT] SUCCESS — user logged in");
+      setUser(data.user);
+      localStorage.setItem('hasAuthSession', 'true');
     } catch (err: any) {
-      console.error('Google redirect error:', err);
+      console.error("[AUTH:HANDLE_REDIRECT] Error:", err.message);
       setError(err.message || 'Google authentication failed');
-      // Don't throw error for redirect, it could be a normal page load
     } finally {
       setIsLoading(false);
     }

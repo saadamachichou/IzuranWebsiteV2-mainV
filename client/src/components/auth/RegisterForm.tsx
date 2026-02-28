@@ -178,6 +178,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess?: () => void }) 
                 <FormControl>
                   <Input
                     type="password"
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     {...field}
                     className="bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"
@@ -197,6 +198,7 @@ export default function RegisterForm({ onSuccess }: { onSuccess?: () => void }) 
                 <FormControl>
                   <Input
                     type="password"
+                    autoComplete="new-password"
                     placeholder="••••••••"
                     {...field}
                     className="bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"

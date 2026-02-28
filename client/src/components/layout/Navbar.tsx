@@ -285,137 +285,116 @@ export default function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden bg-background border-t border-border"
+            className="md:hidden bg-background/95 backdrop-blur-lg border-t border-amber-500/20 max-h-[calc(100vh-3.5rem)] overflow-y-auto"
           >
-            <div className="container mx-auto px-4 py-4">
-              <nav className="flex flex-col space-y-1">
-                {navLinks.map((link) => {
-                  // Special handling for Podcast with dropdown in mobile
-                  if (link.path === '/podcasts') {
-                    return (
-                      <div key={link.path} className="space-y-1">
-                        <Link 
-                          href={link.path}
-                          className={`px-4 py-3 rounded-md transition-colors block focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset ${
-                            location === link.path
-                              ? 'bg-primary/10 text-primary font-medium'
-                              : 'hover:bg-muted'
-                          }`}
-                        >
-                          {link.name}
-                        </Link>
-                        <Link 
-                          href="/serious-izuran"
-                          className={`px-8 py-2 rounded-md transition-colors block text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset ${
-                            location === '/serious-izuran'
-                              ? 'bg-primary/10 text-primary font-medium'
-                              : 'hover:bg-muted'
-                          }`}
-                        >
-                          └ Izuran Series
-                        </Link>
-                        <Link 
-                          href="/streams"
-                          className={`px-8 py-2 rounded-md transition-colors block text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset ${
-                            location === '/streams'
-                              ? 'bg-primary/10 text-primary font-medium'
-                              : 'hover:bg-muted'
-                          }`}
-                        >
-                          └ Streams
-                        </Link>
-                      </div>
-                    );
-                  }
-                  // Regular links
-                  return (
-                    <Link 
-                      key={link.path} 
-                      href={link.path}
-                      className={`px-4 py-3 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset ${
-                        location === link.path
-                          ? 'bg-primary/10 text-primary font-medium'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      {link.name}
-                    </Link>
-                  );
-                })}
+            <div className="container mx-auto px-4 py-3">
+              {/* Nav links in a compact 2-column grid */}
+              <nav className="grid grid-cols-2 gap-1">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    href={link.path}
+                    className={`px-3 py-2 rounded-md text-sm transition-colors text-center ${
+                      location === link.path
+                        ? 'bg-amber-500/15 text-amber-300 font-medium'
+                        : 'text-amber-100/80 hover:bg-amber-500/10 hover:text-amber-200'
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                {/* Podcast sub-links inline */}
+                <Link
+                  href="/serious-izuran"
+                  className={`px-3 py-2 rounded-md text-sm transition-colors text-center ${
+                    location === '/serious-izuran'
+                      ? 'bg-amber-500/15 text-amber-300 font-medium'
+                      : 'text-amber-100/60 hover:bg-amber-500/10 hover:text-amber-200'
+                  }`}
+                >
+                  Izuran Series
+                </Link>
+                <Link
+                  href="/streams"
+                  className={`px-3 py-2 rounded-md text-sm transition-colors text-center ${
+                    location === '/streams'
+                      ? 'bg-amber-500/15 text-amber-300 font-medium'
+                      : 'text-amber-100/60 hover:bg-amber-500/10 hover:text-amber-200'
+                  }`}
+                >
+                  Streams
+                </Link>
               </nav>
 
-              <div className="mt-4 pt-4 border-t border-border">
-                <div className="flex items-center justify-center">
-                  {/* Language Menu */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild aria-label={t('Select language')}>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-2" aria-label={t('Select language')}>
-                        <Globe className="h-4 w-4" />
-                        {language === 'en' ? 'English' : 'Tamazight'}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-black border-amber-500/30 text-white">
-                      <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 text-white">
-                        <span className={language === 'en' ? 'font-medium text-amber-400' : ''}>English</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setLanguage('tmz')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 text-white">
-                        <span className={language === 'tmz' ? 'font-medium text-amber-400' : ''}>ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight)</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+              {/* Divider */}
+              <div className="my-3 border-t border-amber-500/15" />
 
-                <div className="mt-4">
-                  {user ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center p-2 bg-muted rounded-lg">
-                        <UserAvatar className="h-10 w-10 mr-3" />
-                        <div>
-                          <p className="font-medium">{user.username}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                      
-                      <Link href="/profile" className="flex items-center px-4 py-2 hover:bg-muted rounded-md w-full focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset">
-                        {t('Profile')}
-                      </Link>
-                      
-                      <Link href="/favorites" className="flex items-center px-4 py-2 hover:bg-muted rounded-md w-full focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset">
-                        {t('Favorites')}
-                      </Link>
-                      
-                      <Link href="/settings" className="flex items-center px-4 py-2 hover:bg-muted rounded-md w-full focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset">
-                        {t('Settings')}
-                      </Link>
-                      
-                      <Link href="/orders" className="flex items-center px-4 py-2 hover:bg-muted rounded-md w-full focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset">
-                        {t('Order History')}
-                      </Link>
-                      
-                      {user.role === 'admin' && (
-                        <Link href="/admin" className="flex items-center px-4 py-2 hover:bg-muted rounded-md w-full focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-inset">
-                          {t('Admin Dashboard')}
-                        </Link>
-                      )}
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-2"
-                        onClick={logout}
-                      >
-                        {t('Logout')}
-                      </Button>
+              {user ? (
+                <>
+                  {/* User info row with logout */}
+                  <div className="flex items-center gap-3 px-2 py-2 bg-amber-500/5 rounded-lg">
+                    <UserAvatar className="h-9 w-9 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-amber-100 truncate">{user.username}</p>
+                      <p className="text-xs text-amber-200/50 truncate">{user.email}</p>
                     </div>
-                  ) : (
-                    <Button asChild className="w-full" variant="default">
-                      <Link href="/auth" className="flex items-center justify-center gap-2">
-                        <UserAvatar className="h-4 w-4" />
-                        {t('Login / Register')}
-                      </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-shrink-0 text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs px-2"
+                      onClick={logout}
+                    >
+                      {t('Logout')}
                     </Button>
-                  )}
-                </div>
+                  </div>
+
+                  {/* User action links in a compact grid */}
+                  <div className="grid grid-cols-3 gap-1.5 mt-2">
+                    <Link href="/profile" className="flex items-center justify-center px-2 py-2 text-xs text-amber-200/80 hover:bg-amber-500/10 rounded-md transition-colors">
+                      {t('Profile')}
+                    </Link>
+                    <Link href="/favorites" className="flex items-center justify-center px-2 py-2 text-xs text-amber-200/80 hover:bg-amber-500/10 rounded-md transition-colors">
+                      {t('Favorites')}
+                    </Link>
+                    <Link href="/settings" className="flex items-center justify-center px-2 py-2 text-xs text-amber-200/80 hover:bg-amber-500/10 rounded-md transition-colors">
+                      {t('Settings')}
+                    </Link>
+                    <Link href="/orders" className="flex items-center justify-center px-2 py-2 text-xs text-amber-200/80 hover:bg-amber-500/10 rounded-md transition-colors">
+                      {t('Order History')}
+                    </Link>
+                    {user.role === 'admin' && (
+                      <Link href="/admin" className="flex items-center justify-center px-2 py-2 text-xs text-amber-300/90 hover:bg-amber-500/10 rounded-md transition-colors col-span-2">
+                        {t('Admin Dashboard')}
+                      </Link>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <Button asChild className="w-full bg-amber-600 hover:bg-amber-700 text-black font-medium" size="sm">
+                  <Link href="/auth" className="flex items-center justify-center gap-2">
+                    {t('Login / Register')}
+                  </Link>
+                </Button>
+              )}
+
+              {/* Language switcher row */}
+              <div className="flex items-center justify-center mt-2 pt-2 border-t border-amber-500/10">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild aria-label={t('Select language')}>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1.5 text-xs text-amber-200/60 hover:text-amber-200" aria-label={t('Select language')}>
+                      <Globe className="h-3.5 w-3.5" />
+                      {language === 'en' ? 'English' : 'ⵜⴰⵎⴰⵣⵉⵖⵜ'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="bg-black border-amber-500/30 text-white">
+                    <DropdownMenuItem onClick={() => setLanguage('en')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 text-white">
+                      <span className={language === 'en' ? 'font-medium text-amber-400' : ''}>English</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLanguage('tmz')} className="hover:bg-amber-600/20 focus:bg-amber-600/20 text-white">
+                      <span className={language === 'tmz' ? 'font-medium text-amber-400' : ''}>ⵜⴰⵎⴰⵣⵉⵖⵜ (Tamazight)</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </motion.div>

@@ -35,7 +35,11 @@ export default function GoogleLoginButton({
       
       // Step 1: Firebase authentication
       setStatus('firebase');
-      await loginWithGoogle();
+      const result = await loginWithGoogle();
+      if (result.redirecting) {
+        // Mobile redirect flow continues after full-page navigation returns.
+        return;
+      }
       
       // Step 2: Backend authentication (handled inside loginWithGoogle)
       setStatus('backend');

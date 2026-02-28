@@ -147,7 +147,7 @@ export default function LoadingScreen({ isLoading, onLoadingComplete }: LoadingS
                   src="/images/izuran_logo.svg"
                   alt="Izuran Logo"
                   className="object-contain w-full h-full"
-                  fetchPriority="high"
+                  fetchpriority="high"
                   loading="eager"
                 />
               </motion.div>

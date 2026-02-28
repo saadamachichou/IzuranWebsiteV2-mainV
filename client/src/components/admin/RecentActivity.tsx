@@ -279,21 +279,21 @@ export default function RecentActivity() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center justify-between"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h3 className="text-2xl font-bold text-amber-300 mb-2">Recent Activity</h3>
-          <p className="text-amber-200/60">Real-time updates and system notifications</p>
+          <h3 className="mb-1 text-xl font-bold text-amber-300 sm:mb-2 sm:text-2xl">Recent Activity</h3>
+          <p className="text-sm text-amber-200/60 sm:text-base">Real-time updates and system notifications</p>
         </div>
         <Button 
           onClick={fetchRecentActivity}
           variant="outline" 
-          className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+          className="w-full border-amber-500/30 text-amber-300 hover:bg-amber-500/10 sm:w-auto"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
@@ -305,9 +305,9 @@ export default function RecentActivity() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="flex flex-wrap items-center gap-3"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
       >
-        <div className="relative flex-1 min-w-[250px]">
+        <div className="relative sm:col-span-2 lg:col-span-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-amber-400/60" />
           <Input
             type="search"
@@ -319,7 +319,7 @@ export default function RecentActivity() {
         </div>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[140px] bg-black/40 border-amber-500/20 text-amber-200">
+          <SelectTrigger className="w-full bg-black/40 border-amber-500/20 text-amber-200">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent className="bg-black/90 border-amber-500/20">
@@ -336,7 +336,7 @@ export default function RecentActivity() {
         </Select>
 
         <Select value={actionFilter} onValueChange={setActionFilter}>
-          <SelectTrigger className="w-[140px] bg-black/40 border-amber-500/20 text-amber-200">
+          <SelectTrigger className="w-full bg-black/40 border-amber-500/20 text-amber-200">
             <SelectValue placeholder="Action" />
           </SelectTrigger>
           <SelectContent className="bg-black/90 border-amber-500/20">
@@ -352,7 +352,7 @@ export default function RecentActivity() {
         </Select>
 
         <Select value={timeFilter} onValueChange={setTimeFilter}>
-          <SelectTrigger className="w-[140px] bg-black/40 border-amber-500/20 text-amber-200">
+          <SelectTrigger className="w-full bg-black/40 border-amber-500/20 text-amber-200">
             <SelectValue placeholder="Time" />
           </SelectTrigger>
           <SelectContent className="bg-black/90 border-amber-500/20">
@@ -388,10 +388,10 @@ export default function RecentActivity() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className={`relative pl-8 pb-6 ${index !== filteredActivities.length - 1 ? 'border-l-2 border-amber-500/20' : ''}`}
+                    className={`relative pb-5 pl-7 sm:pb-6 sm:pl-8 ${index !== filteredActivities.length - 1 ? 'border-l-2 border-amber-500/20' : ''}`}
                   >
                     {/* Timeline dot */}
-                    <div className={`absolute left-0 top-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transform -translate-x-3 ${getActivityColor(activity.type, activity.action)}`}>
+                    <div className={`absolute left-0 top-0 h-5 w-5 -translate-x-2.5 transform rounded-full border-2 flex items-center justify-center sm:h-6 sm:w-6 sm:-translate-x-3 ${getActivityColor(activity.type, activity.action)}`}>
                       {getActivityIcon(activity.type, activity.action)}
                     </div>
 
@@ -399,17 +399,17 @@ export default function RecentActivity() {
                       className="bg-black/40 rounded-lg border border-amber-500/10 p-4 cursor-pointer hover:border-amber-500/20 transition-colors"
                       onClick={() => toggleExpanded(activity.id)}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-medium text-amber-300">{activity.title}</h4>
+                          <div className="mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
+                            <h4 className="font-medium text-amber-300 text-sm sm:text-base">{activity.title}</h4>
                             <Badge className={getActionBadgeColor(activity.action)}>
                               {activity.action}
                             </Badge>
                           </div>
-                          <p className="text-amber-200/70 text-sm mb-2">{activity.description}</p>
+                          <p className="mb-2 text-sm text-amber-200/70">{activity.description}</p>
                           
-                          <div className="flex items-center gap-4 text-xs text-amber-200/50">
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-amber-200/50 sm:gap-4">
                             <div className="flex items-center gap-2">
                               <Avatar className="h-5 w-5">
                                 <AvatarImage src={activity.user.avatar} />

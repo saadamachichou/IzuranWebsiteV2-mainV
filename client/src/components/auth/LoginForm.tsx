@@ -117,6 +117,7 @@ export default function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
                 <FormControl>
                   <Input
                     type="password"
+                    autoComplete="current-password"
                     placeholder="••••••••"
                     {...field}
                     className="font-montserrat bg-black/60 border-amber-500/20 text-amber-200 placeholder:text-amber-200/50 focus:border-amber-500/50"

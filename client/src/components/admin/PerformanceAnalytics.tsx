@@ -240,20 +240,20 @@ export default function PerformanceAnalytics() {
   } : null);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center justify-between"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h3 className="text-2xl font-bold text-amber-300 mb-2">Performance Analytics</h3>
-          <p className="text-amber-200/60">Comprehensive insights and data visualization</p>
+          <h3 className="mb-1 text-xl font-bold text-amber-300 sm:mb-2 sm:text-2xl">Performance Analytics</h3>
+          <p className="text-sm text-amber-200/60 sm:text-base">Comprehensive insights and data visualization</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-3 sm:gap-3">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[140px] bg-black/40 border-amber-500/20 text-amber-200">
+            <SelectTrigger className="w-full bg-black/40 border-amber-500/20 text-amber-200 sm:w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-black/90 border-amber-500/20">
@@ -264,7 +264,7 @@ export default function PerformanceAnalytics() {
           </Select>
           
           <Select value={chartType} onValueChange={(value: any) => setChartType(value)}>
-            <SelectTrigger className="w-[120px] bg-black/40 border-amber-500/20 text-amber-200">
+            <SelectTrigger className="w-full bg-black/40 border-amber-500/20 text-amber-200 sm:w-[120px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-black/90 border-amber-500/20">
@@ -277,7 +277,7 @@ export default function PerformanceAnalytics() {
           <Button 
             onClick={exportData}
             variant="outline" 
-            className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+            className="w-full border-amber-500/30 text-amber-300 hover:bg-amber-500/10 sm:w-auto"
           >
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -290,18 +290,18 @@ export default function PerformanceAnalytics() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5 sm:gap-6"
       >
         <Card className="bg-black/60 border-amber-500/20 backdrop-blur-xl">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-amber-200/60 text-sm font-medium">Total Users</p>
-                <p className="text-2xl font-bold text-amber-300">
+                <p className="text-xl font-bold text-amber-300 sm:text-2xl">
                   {metrics?.totalUsers || stats?.users || 0}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20 sm:h-12 sm:w-12">
                 <Users className="h-6 w-6 text-amber-400" />
               </div>
             </div>
@@ -314,15 +314,15 @@ export default function PerformanceAnalytics() {
         </Card>
 
         <Card className="bg-black/60 border-amber-500/20 backdrop-blur-xl">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-amber-200/60 text-sm font-medium">Page Views</p>
-                <p className="text-2xl font-bold text-amber-300">
+                <p className="text-xl font-bold text-amber-300 sm:text-2xl">
                   {data?.userActivity?.reduce((sum, item) => sum + item.pageViews, 0).toLocaleString() || 0}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20 sm:h-12 sm:w-12">
                 <Eye className="h-6 w-6 text-amber-400" />
               </div>
             </div>
@@ -335,15 +335,15 @@ export default function PerformanceAnalytics() {
         </Card>
 
         <Card className="bg-black/60 border-amber-500/20 backdrop-blur-xl">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-amber-200/60 text-sm font-medium">Revenue</p>
-                <p className="text-2xl font-bold text-amber-300">
+                <p className="text-xl font-bold text-amber-300 sm:text-2xl">
                   ${metrics?.totalRevenue || 125}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20 sm:h-12 sm:w-12">
                 <ShoppingCart className="h-6 w-6 text-amber-400" />
               </div>
             </div>
@@ -356,15 +356,15 @@ export default function PerformanceAnalytics() {
         </Card>
 
         <Card className="bg-black/60 border-amber-500/20 backdrop-blur-xl">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-amber-200/60 text-sm font-medium">Avg. Engagement</p>
-                <p className="text-2xl font-bold text-amber-300">
+                <p className="text-xl font-bold text-amber-300 sm:text-2xl">
                   {metrics?.avgEngagement || 150}%
                 </p>
               </div>
-              <div className="h-12 w-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20 sm:h-12 sm:w-12">
                 <Activity className="h-6 w-6 text-amber-400" />
               </div>
             </div>
@@ -377,15 +377,15 @@ export default function PerformanceAnalytics() {
         </Card>
 
         <Card className="bg-black/60 border-amber-500/20 backdrop-blur-xl">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-amber-200/60 text-sm font-medium">Total Orders</p>
-                <p className="text-2xl font-bold text-amber-300">
+                <p className="text-xl font-bold text-amber-300 sm:text-2xl">
                   {metrics?.totalOrders || 3}
                 </p>
               </div>
-              <div className="h-12 w-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20 sm:h-12 sm:w-12">
                 <ShoppingCart className="h-6 w-6 text-amber-400" />
               </div>
             </div>
@@ -526,17 +526,17 @@ export default function PerformanceAnalytics() {
           <CardContent>
             <div className="space-y-4">
               {chartData?.topContent?.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-black/40 rounded-lg border border-amber-500/10">
-                  <div className="flex items-center gap-4">
+                <div key={index} className="flex flex-col gap-3 rounded-lg border border-amber-500/10 bg-black/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <div className="flex items-center justify-center w-8 h-8 bg-amber-500/20 rounded-full text-amber-300 font-bold">
                       {index + 1}
                     </div>
-                    <div>
-                      <h4 className="font-medium text-amber-300">{item.title}</h4>
+                    <div className="min-w-0">
+                      <h4 className="truncate font-medium text-amber-300">{item.title}</h4>
                       <p className="text-sm text-amber-200/60">{item.type}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center justify-between gap-4 sm:justify-end sm:gap-6">
                     <div className="text-right">
                       <p className="text-sm text-amber-200/60">Views</p>
                       <p className="font-medium text-amber-300">{item.views}</p>
@@ -544,7 +544,7 @@ export default function PerformanceAnalytics() {
                     <div className="text-right">
                       <p className="text-sm text-amber-200/60">Engagement</p>
                       <div className="flex items-center gap-2">
-                        <Progress value={item.engagement} className="w-20 h-2" />
+                        <Progress value={item.engagement} className="h-2 w-16 sm:w-20" />
                         <span className="text-amber-300 font-medium">{item.engagement}%</span>
                       </div>
                     </div>

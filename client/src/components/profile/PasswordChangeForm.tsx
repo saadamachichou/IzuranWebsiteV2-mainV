@@ -114,6 +114,7 @@ export default function PasswordChangeForm() {
                     <FormControl>
                       <Input
                         type="password"
+                        autoComplete="current-password"
                         placeholder="••••••••"
                         {...field}
                         className="bg-black/70 border-amber-500 text-amber-100 placeholder:text-amber-400 focus:ring-amber-500"
@@ -132,6 +133,7 @@ export default function PasswordChangeForm() {
                     <FormControl>
                       <Input
                         type="password"
+                        autoComplete="new-password"
                         placeholder="••••••••"
                         {...field}
                         className="bg-black/70 border-amber-500 text-amber-100 placeholder:text-amber-400 focus:ring-amber-500"
@@ -150,6 +152,7 @@ export default function PasswordChangeForm() {
                     <FormControl>
                       <Input
                         type="password"
+                        autoComplete="new-password"
                         placeholder="••••••••"
                         {...field}
                         className="bg-black/70 border-amber-500 text-amber-100 placeholder:text-amber-400 focus:ring-amber-500"
