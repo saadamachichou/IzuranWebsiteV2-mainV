@@ -28,6 +28,16 @@ if (process.env.NODE_ENV === 'production') {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// In production, canonicalize www → non-www so cookies stay on a single domain
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.hostname === 'www.izuranrecords.com') {
+      return res.redirect(301, `https://izuranrecords.com${req.originalUrl}`);
+    }
+    next();
+  });
+}
+
 // Configure CORS - allow localhost and production domain
 app.use(cors({
   origin: [
@@ -42,13 +52,14 @@ app.use(cors({
   maxAge: 86400 // 24 hours
 }));
 
-// Increase header size limit and set headers for SoundCloud embeds
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Max-Age', '86400');
-  
-  // Add Permissions-Policy header to allow encrypted-media for SoundCloud embeds
-  // This must be set for all responses, not just HTML
   res.setHeader('Permissions-Policy', 'encrypted-media=*, microphone=*, camera=*, geolocation=*');
+
+  // Allow Firebase popup auth to communicate back to the opener window.
+  // Without this, mobile Safari cannot close the popup or read window.closed,
+  // causing the popup tab to linger and potentially triggering a page reload.
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   
   // Content Security Policy — permissive enough for all features:
   //   unsafe-eval   : Firebase SDK, Vite HMR, framer-motion, and dynamic libraries use eval

@@ -88,52 +88,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // On load: process Google redirect first (mobile return), then check auth status
+  // On load: process Google redirect (mobile return) then check auth status.
+  // isLoading is managed exclusively here to avoid intermediate flickers that
+  // would cause ProtectedAdminRoute to flash-redirect to /auth.
   useEffect(() => {
-    const checkAuthStatus = async (forceCheck = false) => {
+    const init = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        
-        // Skip auth check only if we've already confirmed there's no session
-        if (!forceCheck && !mightHaveValidSession()) {
-          setUser(null);
-          setIsLoading(false);
-          return;
+        // 1. On real mobile devices, handle a possible Google redirect return.
+        //    ONLY do the expensive Firebase redirect check when a redirect was
+        //    actually initiated (flag in sessionStorage).  This eliminates a
+        //    4+ second delay on every normal mobile page load.
+        const redirectPending = sessionStorage.getItem('googleRedirectPending') === 'true';
+        if (isRealMobileDevice() && redirectPending) {
+          await handleGoogleRedirect();
         }
-        
-        // Use our fetchWithTokenRefresh which handles token refresh automatically
-        const response = await fetchWithTokenRefresh('/api/auth/me');
-        
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-          localStorage.setItem('hasAuthSession', 'true');
+
+        // 2. Check server-side auth status (session + JWT cookies).
+        const shouldCheck = redirectPending || mightHaveValidSession();
+        if (shouldCheck) {
+          const response = await fetchWithTokenRefresh('/api/auth/me');
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data.user);
+            localStorage.setItem('hasAuthSession', 'true');
+          } else {
+            setUser(null);
+            localStorage.removeItem('hasAuthSession');
+          }
         } else {
-          // 401 is expected when user is not authenticated - silently handle
           setUser(null);
-          localStorage.removeItem('hasAuthSession');
         }
       } catch (err) {
-        // Silently handle errors - expected when user is not authenticated
         setUser(null);
         localStorage.removeItem('hasAuthSession');
       } finally {
         setIsLoading(false);
         localStorage.setItem('authChecked', 'true');
-      }
-    };
-
-    const init = async () => {
-      try {
-        setIsLoading(true);
-        const redirectPending = sessionStorage.getItem('googleRedirectPending') === 'true';
-        // 1. Process Google redirect FIRST - when returning from mobile sign-in, we must handle this before anything else
-        await handleGoogleRedirect();
-        // 2. Then check auth status (or verify session from redirect)
-        // Force a check after redirect attempts so mobile return never gets skipped.
-        await checkAuthStatus(redirectPending);
-      } finally {
-        setIsLoading(false);
       }
     };
     init();
@@ -363,25 +354,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Called on every page load — handles the return from Google redirect (mobile flow)
+  // Handles the return from a Google signInWithRedirect (mobile fallback).
+  // Does NOT manage isLoading — the caller (init) is responsible.
   const handleGoogleRedirect = async () => {
-    // Only bother checking if we're on a mobile device
-    if (!isRealMobileDevice()) return;
-
-    const redirectPending = sessionStorage.getItem('googleRedirectPending') === 'true';
     const redirectTs = parseInt(sessionStorage.getItem('googleRedirectTimestamp') || '0');
     const redirectAgeMs = Date.now() - redirectTs;
-    // Honour flag only if set within the last 5 minutes
-    const isReturningFromRedirect = redirectPending && redirectAgeMs < 5 * 60 * 1000;
+    const isReturningFromRedirect = redirectAgeMs < 5 * 60 * 1000;
 
     console.log("[AUTH:HANDLE_REDIRECT]", { isReturningFromRedirect, redirectAgeMs });
 
-    // On a normal page load with no pending redirect, resolve quickly
-    const TIMEOUT_MS = isReturningFromRedirect ? 20000 : 4000;
+    if (!isReturningFromRedirect) {
+      sessionStorage.removeItem('googleRedirectPending');
+      sessionStorage.removeItem('googleRedirectTimestamp');
+      return;
+    }
+
+    const TIMEOUT_MS = 20000;
 
     try {
-      setIsLoading(true);
-
       let firebaseUser = await Promise.race([
         getGoogleRedirectResult().catch((err) => {
           console.error("[AUTH:HANDLE_REDIRECT] getGoogleRedirectResult threw:", err?.message);
@@ -389,17 +379,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
         new Promise<null>((resolve) =>
           setTimeout(() => {
-            if (isReturningFromRedirect) {
-              console.warn(`[AUTH:HANDLE_REDIRECT] Timed out after ${TIMEOUT_MS}ms`);
-            }
+            console.warn(`[AUTH:HANDLE_REDIRECT] Timed out after ${TIMEOUT_MS}ms`);
             resolve(null);
           }, TIMEOUT_MS)
         ),
       ]);
 
-      // Some mobile browsers complete redirect auth but return null from getRedirectResult().
-      // Fallback to the currently authenticated Firebase user before giving up.
-      if (!firebaseUser && isReturningFromRedirect) {
+      if (!firebaseUser) {
         firebaseUser = await waitForFirebaseUserAfterRedirect(8000);
         if (firebaseUser) {
           console.log("[AUTH:HANDLE_REDIRECT] Fallback recovered Firebase user via auth state");
@@ -446,8 +432,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       console.error("[AUTH:HANDLE_REDIRECT] Error:", err.message);
       setError(err.message || 'Google authentication failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
