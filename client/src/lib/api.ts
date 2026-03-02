@@ -21,8 +21,7 @@ api.interceptors.response.use(
       
       // You can add specific error handling here
       if (error.response.status === 401) {
-        // Handle unauthorized access
-        window.location.href = '/login';
+        window.location.href = '/auth';
       }
     } else if (error.request) {
       // The request was made but no response was received

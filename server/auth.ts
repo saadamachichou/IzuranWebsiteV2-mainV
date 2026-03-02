@@ -175,15 +175,19 @@ export async function registerUser(req: Request, res: Response) {
       createdAt: schema.users.createdAt
     });
     
-    // Generate JWT tokens
     const accessToken = generateAccessToken(newUser as schema.User);
     const refreshToken = generateRefreshToken(newUser as schema.User);
     
-    // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity)
+    const cookieOptions = getAuthCookieOptions();
+    
+    res.cookie('accessToken', accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000
+    });
+    
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
+      ...cookieOptions,
+      maxAge: 8 * 60 * 60 * 1000
     });
     
     return res.status(201).json({ 
@@ -205,34 +209,33 @@ export async function registerUser(req: Request, res: Response) {
   }
 }
 
+function getAuthCookieOptions() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax' as const,
+    path: '/'
+  };
+}
+
 export async function loginUser(req: Request, res: Response) {
-  // Passport.authenticate middleware has already verified the user at this point
   if (req.user) {
-    // Generate JWT tokens
     const accessToken = generateAccessToken(req.user as any);
     const refreshToken = generateRefreshToken(req.user as any);
     
-    // Security settings for cookies
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' as 'none' | 'lax',
-      path: '/'
-    };
+    const cookieOptions = getAuthCookieOptions();
     
-    // Set access token in HTTP-only cookie
     res.cookie('accessToken', accessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60 * 1000 // 15 minutes
+      maxAge: 15 * 60 * 1000
     });
     
-    // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity)
     res.cookie('refreshToken', refreshToken, {
       ...cookieOptions,
-      maxAge: 8 * 60 * 60 * 1000 // 8 hours
+      maxAge: 8 * 60 * 60 * 1000
     });
     
-    // Return user info and access token (for non-cookie clients)
     return res.json({ 
       user: req.user,
       accessToken
@@ -247,9 +250,9 @@ export function logoutUser(req: Request, res: Response) {
       return res.status(500).json({ message: "Logout failed" });
     }
     
-    // Clear both auth cookies so session is fully ended
-    res.clearCookie('refreshToken');
-    res.clearCookie('accessToken');
+    const clearOptions = { httpOnly: true, path: '/' };
+    res.clearCookie('refreshToken', clearOptions);
+    res.clearCookie('accessToken', clearOptions);
     
     return res.json({ message: "Logout successful" });
   });
@@ -298,8 +301,7 @@ export async function refreshToken(req: Request, res: Response) {
     
     const payload = verifyRefreshToken(refreshToken);
     if (!payload) {
-      // Clear the invalid cookie
-      res.clearCookie('refreshToken');
+      res.clearCookie('refreshToken', { httpOnly: true, path: '/' });
       return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
     
@@ -312,24 +314,15 @@ export async function refreshToken(req: Request, res: Response) {
       return res.status(404).json({ message: "User not found" });
     }
     
-    // Generate new access token
     const accessToken = generateAccessToken(user);
     
-    // Set security options for cookie (refresh cookie stays 8h)
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' as 'none' | 'lax',
-      path: '/'
-    };
+    const cookieOptions = getAuthCookieOptions();
     
-    // Set access token in HTTP-only cookie
     res.cookie('accessToken', accessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60 * 1000 // 15 minutes
+      maxAge: 15 * 60 * 1000
     });
     
-    // Return the token in the response body as well (for non-cookie clients)
     return res.json({ accessToken });
   } catch (err) {
     console.error("Token refresh error:", err);
@@ -514,27 +507,19 @@ export async function authenticateWithGoogle(req: Request, res: Response) {
         return res.status(500).json({ message: "Failed to login after Google authentication", error: err.message });
       }
       
-      // Generate JWT tokens
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
 
-      const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' as 'none' | 'lax',
-        path: '/'
-      };
+      const cookieOptions = getAuthCookieOptions();
 
-      // Set short-lived access token cookie for authenticated API calls.
       res.cookie('accessToken', accessToken, {
         ...cookieOptions,
-        maxAge: 15 * 60 * 1000 // 15 minutes
+        maxAge: 15 * 60 * 1000
       });
 
-      // Set refresh token in HTTP-only cookie (8h - session ends after 8h inactivity).
       res.cookie('refreshToken', refreshToken, {
         ...cookieOptions,
-        maxAge: 8 * 60 * 60 * 1000 // 8 hours
+        maxAge: 8 * 60 * 60 * 1000
       });
       
       return res.status(200).json({
