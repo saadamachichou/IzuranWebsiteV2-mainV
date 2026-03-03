@@ -25,9 +25,18 @@ function getFirebaseConfig() {
   const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
   const appId = import.meta.env.VITE_FIREBASE_APP_ID;
   if (!apiKey || !projectId || !appId) return null;
+
+  // In production, use the app's own domain as authDomain so the Firebase
+  // auth handler iframe/redirect runs same-origin. The Express server proxies
+  // /__/auth/* to firebaseapp.com, making all auth cookies first-party and
+  // fixing third-party cookie blocking on mobile Chrome/Safari.
+  const useOwnDomain =
+    typeof window !== 'undefined' &&
+    window.location.hostname === 'izuranrecords.com';
+
   return {
     apiKey,
-    authDomain: `${projectId}.firebaseapp.com`,
+    authDomain: useOwnDomain ? 'izuranrecords.com' : `${projectId}.firebaseapp.com`,
     projectId,
     storageBucket: `${projectId}.appspot.com`,
     appId,

@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
+import https from "https";
 import { registerRoutes } from "./routes";
 // Import from static.ts (no vite dependencies) for production
 import { serveStatic, log } from "./static";
@@ -24,6 +25,44 @@ const app = express();
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
+
+// Proxy Firebase auth handler through the app's own domain so the auth
+// iframe and redirect flow are same-origin. This prevents third-party
+// cookie blocking (Chrome/Safari) that causes getRedirectResult() to
+// return null on mobile devices.
+const FIREBASE_AUTH_HOST = 'izuran-4731d.firebaseapp.com';
+app.use('/__/auth', (req: Request, res: Response) => {
+  const proxyHeaders: Record<string, string | string[]> = {};
+  for (const [key, val] of Object.entries(req.headers)) {
+    if (val != null && key !== 'host' && key !== 'connection') {
+      proxyHeaders[key] = val;
+    }
+  }
+  proxyHeaders['host'] = FIREBASE_AUTH_HOST;
+
+  const proxyReq = https.request(
+    {
+      hostname: FIREBASE_AUTH_HOST,
+      path: `/__/auth${req.url}`,
+      method: req.method,
+      headers: proxyHeaders,
+    },
+    (proxyRes) => {
+      const resHeaders = { ...proxyRes.headers };
+      delete resHeaders['connection'];
+      delete resHeaders['transfer-encoding'];
+      res.writeHead(proxyRes.statusCode || 200, resHeaders);
+      proxyRes.pipe(res);
+    }
+  );
+
+  proxyReq.on('error', (err) => {
+    log(`[PROXY] Firebase auth error: ${err.message}`);
+    if (!res.headersSent) res.status(502).end();
+  });
+
+  req.pipe(proxyReq);
+});
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
