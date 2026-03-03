@@ -248,11 +248,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
   };
 
-  // Google login — always try popup first (works on both desktop and mobile).
-  // signInWithPopup opens a new tab on mobile browsers which avoids the
-  // cross-origin redirect-state-recovery problem that breaks signInWithRedirect
-  // when authDomain differs from the app origin.
-  // Falls back to redirect only if the popup is explicitly blocked.
+  // Completes the backend half of Google auth after Firebase provides a user.
+  // Shared by both popup (desktop) and redirect (mobile) flows.
+  const completeGoogleAuth = async (firebaseUser: import("firebase/auth").User, accessToken?: string) => {
+    const userData = {
+      providerId: firebaseUser.uid,
+      email: firebaseUser.email,
+      username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'user',
+      firstName: firebaseUser.displayName?.split(' ')[0],
+      lastName: firebaseUser.displayName?.split(' ').slice(1).join(' '),
+      profilePictureUrl: firebaseUser.photoURL?.replace('=s96-c', '=s400-c'),
+      authProvider: 'google',
+      accessToken,
+    };
+
+    console.log("[AUTH:LOGIN_GOOGLE] Sending to backend...");
+    const response = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      let errorMsg = 'Google authentication failed on the server';
+      try {
+        const errorData = await response.json();
+        errorMsg = errorData.message || errorData.error || errorMsg;
+      } catch {}
+      throw new Error(errorMsg);
+    }
+
+    const data = await response.json();
+    console.log("[AUTH:LOGIN_GOOGLE] Backend success");
+    setUser(data.user);
+    localStorage.setItem('hasAuthSession', 'true');
+
+    // Upload Google profile image to local server (non-blocking — don't await)
+    if (firebaseUser.photoURL) {
+      fetchAndUploadGoogleProfileImage(firebaseUser.photoURL.replace('=s96-c', '=s400-c'))
+        .then(async (localUrl) => {
+          if (!localUrl) return;
+          await fetch('/api/auth/profile-picture-url', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profilePictureUrl: localUrl }),
+            credentials: 'include'
+          });
+          setUser((prev) => prev ? { ...prev, profilePictureUrl: localUrl } : prev);
+        })
+        .catch(() => {});
+    }
+  };
+
+  // Google login.
+  // Mobile: use redirect flow (popup is broken by COOP + third-party cookie blocking).
+  // Desktop: try popup, fall back to redirect if blocked.
   const loginWithGoogle = async (): Promise<{ redirecting: boolean }> => {
     try {
       setIsLoading(true);
@@ -264,87 +315,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userAgent: navigator.userAgent,
       });
 
-      let firebaseUser: import("firebase/auth").User;
-      let accessToken: string | undefined;
+      // Mobile browsers block cross-origin popup communication (COOP) and
+      // third-party cookies, causing signInWithPopup to fail with
+      // 'auth/popup-closed-by-user'. Use the redirect flow instead.
+      if (isRealMobileDevice()) {
+        console.log("[AUTH:LOGIN_GOOGLE] Mobile — using redirect flow");
+        await signInWithGoogleRedirect();
+        return { redirecting: true };
+      }
 
+      // Desktop: popup flow
       try {
         const result = await signInWithGoogle();
-        firebaseUser = result.user;
-        accessToken = result.accessToken;
+        if (!result.user) {
+          throw new Error('Google authentication failed - No user data received');
+        }
+        await completeGoogleAuth(result.user, result.accessToken);
+        return { redirecting: false };
       } catch (popupErr: any) {
         if (popupErr?.code === 'auth/popup-closed-by-user' || popupErr?.code === 'auth/cancelled-popup-request') {
           return { redirecting: false };
         }
-
-        // Popup was blocked — fall back to redirect as last resort
         if (popupErr?.code === 'auth/popup-blocked') {
           console.warn("[AUTH:LOGIN_GOOGLE] Popup blocked, falling back to redirect");
           await signInWithGoogleRedirect();
           return { redirecting: true };
         }
-
         throw popupErr;
       }
-
-      if (!firebaseUser) {
-        throw new Error('Google authentication failed - No user data received');
-      }
-
-      // Authenticate with backend
-      const userData = {
-        providerId: firebaseUser.uid,
-        email: firebaseUser.email,
-        username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'user',
-        firstName: firebaseUser.displayName?.split(' ')[0],
-        lastName: firebaseUser.displayName?.split(' ').slice(1).join(' '),
-        profilePictureUrl: firebaseUser.photoURL?.replace('=s96-c', '=s400-c'),
-        authProvider: 'google',
-        accessToken,
-      };
-      console.log("[AUTH:LOGIN_GOOGLE] Sending to backend...");
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        let errorMsg = 'Google authentication failed on the server';
-        try {
-          const errorData = await response.json();
-          errorMsg = errorData.message || errorData.error || errorMsg;
-          console.error("Backend auth error:", errorData);
-        } catch (jsonError) {
-          console.error("Failed to parse error response:", jsonError);
-        }
-        throw new Error(errorMsg);
-      }
-
-      const data = await response.json();
-      console.log("[AUTH:LOGIN_GOOGLE] Backend success");
-      setUser(data.user);
-      localStorage.setItem('hasAuthSession', 'true');
-
-      // Upload Google profile image to local server in background
-      if (firebaseUser.photoURL) {
-        const localProfilePictureUrl = await fetchAndUploadGoogleProfileImage(firebaseUser.photoURL.replace('=s96-c', '=s400-c'));
-        if (localProfilePictureUrl) {
-          await fetch('/api/auth/profile-picture-url', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profilePictureUrl: localProfilePictureUrl }),
-            credentials: 'include'
-          });
-          const refreshed = await fetchWithTokenRefresh('/api/auth/me');
-          if (refreshed.ok) {
-            const refreshedData = await refreshed.json();
-            setUser(refreshedData.user);
-          } else {
-            setUser((prev) => prev ? { ...prev, profilePictureUrl: localProfilePictureUrl } : prev);
-          }
-        }
-      }
-      return { redirecting: false };
     } catch (err: any) {
       console.error('Google login error:', err);
       setError(err.message || 'Google authentication failed');
@@ -400,35 +398,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!firebaseUser) return;
 
       console.log("[AUTH:HANDLE_REDIRECT] User received, authenticating with backend...");
-
-      const userData = {
-        providerId: firebaseUser.uid,
-        email: firebaseUser.email,
-        username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'user',
-        firstName: firebaseUser.displayName?.split(' ')[0],
-        lastName: firebaseUser.displayName?.split(' ').slice(1).join(' '),
-        profilePictureUrl: firebaseUser.photoURL?.replace('=s96-c', '=s400-c'),
-        authProvider: 'google',
-      };
-
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-        credentials: 'include',
-      });
-
-      console.log("[AUTH:HANDLE_REDIRECT] Backend response:", response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Google authentication failed on the server');
-      }
-
-      const data = await response.json();
+      await completeGoogleAuth(firebaseUser);
       console.log("[AUTH:HANDLE_REDIRECT] SUCCESS — user logged in");
-      setUser(data.user);
-      localStorage.setItem('hasAuthSession', 'true');
     } catch (err: any) {
       console.error("[AUTH:HANDLE_REDIRECT] Error:", err.message);
       setError(err.message || 'Google authentication failed');
